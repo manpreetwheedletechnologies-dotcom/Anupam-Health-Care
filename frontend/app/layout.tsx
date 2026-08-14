@@ -1,0 +1,29 @@
+import type { Metadata } from "next";
+import "./globals.css";
+import FloatingWhatsApp from "@/components/FloatingWhatsApp";
+import BookServiceModal from "@/components/BookServiceModal";
+import { BookingModalProvider } from "@/context/BookingModalContext";
+
+export const metadata: Metadata = {
+  title: "Anupam Health Care Services | Care Beyond Compare",
+  description:
+    "Home nursing, elder care, medical equipment on rent, blood sample collection and doctor consultation at home in Ghaziabad. Call 7011598306.",
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body className="font-sans text-gray-900 antialiased">
+        <BookingModalProvider>
+          {children}
+          <FloatingWhatsApp />
+          <BookServiceModal />
+        </BookingModalProvider>
+      </body>
+    </html>
+  );
+}

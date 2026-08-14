@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --brand-navy: #1a2a4a;
+    --brand-green: #2e7d32;
+    --brand-sky: #e8f0fe;
+    --brand-greenLight: #e8f5e9;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply antialiased text-gray-800;
+  }
+}
+
+@layer components {
+  .animate-slide-down {
+    animation: slideDown 0.3s ease-out;
+  }
+  
+  .animate-fade-up {
+    animation: fadeUp 0.5s ease-out;
+  }
+  
+  .animate-pulse-slow {
+    animation: pulseSlow 3s ease-in-out infinite;
+  }
+  
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes pulseSlow {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.8;
+    }
+  }
+}
+
+@layer utilities {
+  .shadow-card {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  }
+  
+  .shadow-cardHover {
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.1);
+  }
+  
+  .shadow-form {
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.5s ease forwards;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.5s ease forwards;
+}
