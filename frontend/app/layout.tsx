@@ -3,6 +3,7 @@ import "./globals.css";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import BookServiceModal from "@/components/BookServiceModal";
 import { BookingModalProvider } from "@/context/BookingModalContext";
+import { SiteDataProvider } from "@/context/SiteDataContext";
 
 export const metadata: Metadata = {
   title: "Anupam Health Care Services | Care Beyond Compare",
@@ -18,11 +19,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-sans text-gray-900 antialiased">
-        <BookingModalProvider>
-          {children}
-          <FloatingWhatsApp />
-          <BookServiceModal />
-        </BookingModalProvider>
+        <SiteDataProvider>
+          <BookingModalProvider>
+            {children}
+            <FloatingWhatsApp />
+            <BookServiceModal />
+          </BookingModalProvider>
+        </SiteDataProvider>
       </body>
     </html>
   );

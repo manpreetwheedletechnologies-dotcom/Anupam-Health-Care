@@ -1,57 +1,69 @@
-import { Sparkles } from "lucide-react";
-import { SERVICES } from "@/lib/services";
+"use client";
+
+import Image from "next/image";
+import { Sparkles, ArrowRight } from "lucide-react";
+import { useSiteData } from "@/context/SiteDataContext";
+import ServiceCard from "@/components/ServiceCard";
+
+const VISIBLE_COUNT = 4;
 
 export default function Services() {
+  const { services } = useSiteData();
+  const visibleServices = services.slice(0, VISIBLE_COUNT);
+  const hasMore = services.length > VISIBLE_COUNT;
+
   return (
-    <section id="services" className="relative bg-gray-50 px-5 py-12 md:px-8 md:py-20">
-      <div className="mx-auto max-w-7xl">
-        <div className="text-center">
-          <div className="inline-flex items-center gap-2 rounded-full bg-brand-sky/30 px-4 py-1.5 text-xs font-semibold text-brand-navy">
-            <Sparkles size={14} />
-            Our Services
+    <section id="services" className="relative overflow-hidden bg-gray-50 px-5 py-12 md:px-8 md:py-20">
+      {/* Decorative background, matching the rest of the page */}
+      <div className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-brand-sky/10 blur-3xl" />
+      <div className="absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-brand-green/10 blur-3xl" />
+
+      <div className="relative mx-auto max-w-7xl">
+        <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div className="text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-brand-sky/30 to-brand-green/30 px-4 py-1.5 text-xs font-semibold text-brand-navy shadow-sm border border-white/50">
+              <Sparkles size={14} className="text-brand-green" />
+              Our Services
+            </div>
+            <h2 className="mt-4 text-3xl font-bold text-brand-navy sm:text-4xl">
+              Comprehensive Healthcare
+              <span className="block bg-gradient-to-r from-brand-navy to-brand-green bg-clip-text text-transparent">
+                at Home
+              </span>
+            </h2>
+            <p className="mt-3 max-w-2xl text-base text-gray-500 lg:mx-0 mx-auto">
+              Professional medical care delivered with compassion, expertise,
+              and a personal touch — right at your doorstep.
+            </p>
           </div>
-          <h2 className="mt-4 text-3xl font-bold text-brand-navy sm:text-4xl">
-            Comprehensive Healthcare at Home
-          </h2>
-          <p className="mt-3 mx-auto max-w-2xl text-base text-gray-500">
-            Professional medical care delivered with compassion, expertise, 
-            and a personal touch — right at your doorstep
-          </p>
+          <div className="relative mx-auto hidden h-40 w-40 shrink-0 overflow-hidden rounded-2xl shadow-card sm:block lg:h-44 lg:w-44 ring-4 ring-white">
+            <Image
+              src="/images/expert-care.png"
+              alt="Nurse caring for patient at home"
+              fill
+              className="object-cover"
+            />
+          </div>
         </div>
 
-        <div className="mt-12 grid grid-cols-2 gap-4 md:grid-cols-4">
-          {SERVICES.map(({ title, desc, icon: Icon, color, bg, slug, features }) => (
-            <a
-              key={title}
-              href={`/services/${slug}`}
-              className={`group relative overflow-hidden rounded-2xl p-6 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl ${
-                bg === "sky" ? "bg-brand-sky" : "bg-brand-greenLight"
-              }`}
-            >
-              <div
-                className={`mb-4 flex h-12 w-12 items-center justify-center rounded-full transition-transform group-hover:scale-110 ${
-                  color === "navy" ? "bg-brand-navy" : "bg-brand-green"
-                }`}
-              >
-                <Icon size={20} className="text-white" />
-              </div>
-              <p className="text-sm font-semibold text-gray-900">{title}</p>
-              <p className="mt-1 text-xs text-gray-600">{desc}</p>
-              
-              {features && (
-                <div className="mt-3 flex flex-wrap gap-1">
-                  {features.map((f) => (
-                    <span key={f} className="text-[9px] font-medium text-gray-600 bg-white/50 px-2 py-0.5 rounded-full">
-                      {f}
-                    </span>
-                  ))}
-                </div>
-              )}
-              
-              <div className="absolute -bottom-12 -right-12 h-24 w-24 rounded-full bg-white/10 transition-transform group-hover:scale-150" />
-            </a>
+        <div className="mt-12 grid grid-cols-2 gap-5 md:grid-cols-4">
+          {visibleServices.map((service) => (
+            <ServiceCard key={service.id} {...service} />
           ))}
         </div>
+
+        {/* View more */}
+        {hasMore && (
+          <div className="mt-10 text-center">
+            <a
+              href="/services"
+              className="group inline-flex items-center gap-2 rounded-full border-2 border-brand-navy/15 bg-white px-6 py-3 text-sm font-semibold text-brand-navy shadow-sm transition-all duration-300 hover:border-brand-navy/30 hover:shadow-lg"
+            >
+              View All Services
+              <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
+            </a>
+          </div>
+        )}
       </div>
     </section>
   );

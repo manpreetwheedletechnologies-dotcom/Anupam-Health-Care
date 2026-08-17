@@ -1,7 +1,11 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { SERVICES } from "@/lib/services";
-import { ArrowRight } from "lucide-react";
+import { getServices } from "@/lib/api";
+import ServiceCard from "@/components/ServiceCard";
+
+// Always hit the backend fresh — services are managed live from the
+// admin dashboard, so this page can't be statically cached at build time.
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Our Services | Anupam Health Care Services",
@@ -9,7 +13,9 @@ export const metadata = {
     "Nursing care, elder care, equipment on rent, blood collection, physiotherapy, doctor consultation and ambulance service at home in Ghaziabad.",
 };
 
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  const services = await getServices().catch(() => []);
+
   return (
     <main className="min-h-screen bg-white">
       <Header />
@@ -28,35 +34,18 @@ export default function ServicesPage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-5 py-12 md:px-8">
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {SERVICES.map(({ title, desc, icon: Icon, color, slug, features }) => (
-            <a
-              key={slug}
-              href={`/services/${slug}`}
-              className="group rounded-2xl border border-gray-100 p-6 shadow-card transition hover:-translate-y-1 hover:shadow-cardHover"
-            >
-              <div
-                className={`mb-4 flex h-12 w-12 items-center justify-center rounded-full ${
-                  color === "navy" ? "bg-brand-navy" : "bg-brand-green"
-                }`}
-              >
-                <Icon size={20} className="text-white" />
-              </div>
-              <p className="text-base font-semibold text-gray-900">{title}</p>
-              <p className="mt-1 text-sm text-gray-500">{desc}</p>
-              <ul className="mt-4 space-y-1">
-                {features.map((f) => (
-                  <li key={f} className="text-xs text-gray-400">
-                    • {f}
-                  </li>
-                ))}
-              </ul>
-              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand-navy">
-                Learn more <ArrowRight size={14} />
-              </span>
-            </a>
-          ))}
-        </div>
+        {services.length === 0 ? (
+          <p className="text-center text-sm text-gray-400">
+            Services will appear here shortly. Please check back soon or call
+            us on <a href="tel:7011598306" className="font-semibold text-brand-navy">7011598306</a>.
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {services.map((service) => (
+              <ServiceCard key={service.id} {...service} />
+            ))}
+          </div>
+        )}
       </section>
 
       <Footer />

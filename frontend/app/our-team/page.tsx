@@ -1,6 +1,10 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import Image from "next/image";
 import { UserRound } from "lucide-react";
+import { getTeam } from "@/lib/api";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Our Team | Anupam Health Care Services",
@@ -8,30 +12,9 @@ export const metadata = {
     "Meet the nurses, GDA staff, and physiotherapists behind Anupam Health Care Services in Ghaziabad.",
 };
 
-const TEAM = [
-  {
-    name: "Aakash Kaushik",
-    role: "Founder & Care Provider",
-    desc: "Leads Anupam Health Care Services and personally oversees quality of care for every family.",
-  },
-  {
-    name: "Nursing team",
-    role: "Registered nurses (M/F)",
-    desc: "Qualified and experienced nurses trained for post-surgery care, injections, and chronic disease management.",
-  },
-  {
-    name: "GDA & attendant staff",
-    role: "Elder care specialists",
-    desc: "Trained General Duty Assistants for daily support, companionship, and mobility assistance.",
-  },
-  {
-    name: "Physiotherapy team",
-    role: "Licensed physiotherapists",
-    desc: "Home-based rehabilitation for pain relief, mobility, and post-surgery recovery.",
-  },
-];
+export default async function OurTeamPage() {
+  const team = await getTeam().catch(() => []);
 
-export default function OurTeamPage() {
   return (
     <main className="min-h-screen bg-white">
       <Header />
@@ -49,28 +32,47 @@ export default function OurTeamPage() {
         </p>
       </section>
 
-      <section className="mx-auto max-w-5xl px-5 py-14 md:px-8">
-        <div className="grid gap-6 sm:grid-cols-2">
-          {TEAM.map((member) => (
-            <div
-              key={member.name}
-              className="flex gap-4 rounded-2xl border border-gray-100 p-6 shadow-card"
-            >
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-brand-navy">
-                <UserRound size={24} className="text-white" />
-              </div>
-              <div>
-                <p className="text-base font-semibold text-gray-900">
-                  {member.name}
-                </p>
-                <p className="text-xs font-medium text-brand-green">
-                  {member.role}
-                </p>
-                <p className="mt-2 text-sm text-gray-500">{member.desc}</p>
-              </div>
-            </div>
-          ))}
+      <section className="mx-auto max-w-5xl px-5 pt-10 md:px-8">
+        <div className="relative h-56 overflow-hidden rounded-2xl shadow-card sm:h-72">
+          <Image
+            src="/images/nurse-patient-care.png"
+            alt="Anupam Health Care team caring for a patient"
+            fill
+            className="object-cover"
+          />
         </div>
+      </section>
+
+      <section className="mx-auto max-w-5xl px-5 py-14 md:px-8">
+        {team.length === 0 ? (
+          <p className="text-center text-sm text-gray-400">Team details coming soon.</p>
+        ) : (
+          <div className="grid gap-6 sm:grid-cols-2">
+            {team.map((member) => (
+              <div
+                key={member.id}
+                className="flex gap-4 rounded-2xl border border-gray-100 p-6 shadow-card"
+              >
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-brand-navy overflow-hidden">
+                  {member.image ? (
+                    <Image src={member.image} alt={member.name} width={56} height={56} className="object-cover" />
+                  ) : (
+                    <UserRound size={24} className="text-white" />
+                  )}
+                </div>
+                <div>
+                  <p className="text-base font-semibold text-gray-900">
+                    {member.name}
+                  </p>
+                  <p className="text-xs font-medium text-brand-green">
+                    {member.role}
+                  </p>
+                  <p className="mt-2 text-sm text-gray-500">{member.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
       <Footer />

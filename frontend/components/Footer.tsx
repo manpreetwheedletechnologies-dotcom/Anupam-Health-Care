@@ -1,4 +1,7 @@
+"use client";
+
 import { Heart, Phone, Mail, MapPin, Clock, Facebook, Instagram, Youtube, Twitter, Award, Shield } from "lucide-react";
+import { useSiteData } from "@/context/SiteDataContext";
 
 const QUICK_LINKS = [
   { label: "Home", href: "/" },
@@ -7,17 +10,6 @@ const QUICK_LINKS = [
   { label: "Our Team", href: "/our-team" },
   { label: "Blogs & Resources", href: "/blog" },
   { label: "Contact Us", href: "/contact-us" },
-];
-
-const SERVICES_LIST = [
-  { label: "Nursing Care", slug: "nursing-care" },
-  { label: "Elder Care", slug: "elder-care" },
-  { label: "Equipment Rent", slug: "equipment-rent" },
-  { label: "Blood Collection", slug: "blood-sample-collection" },
-  { label: "Patient Care", slug: "patient-care" },
-  { label: "Physiotherapy", slug: "physiotherapy-at-home" },
-  { label: "Doctor Consult", slug: "doctor-consultation" },
-  { label: "Ambulance Service", slug: "ambulance-service" },
 ];
 
 const CONTACT_INFO = [
@@ -35,16 +27,23 @@ const SOCIAL_LINKS = [
 ];
 
 export default function Footer() {
+  const { services } = useSiteData();
+  const servicesList = services.map((s) => ({ label: s.title, slug: s.slug }));
+
   return (
-    <footer className="bg-brand-navy text-white">
+    <footer className="bg-[#022b51] text-white">
       <div className="mx-auto max-w-7xl px-5 py-12 md:px-8 md:py-16">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
-                <Heart size={18} className="text-brand-green" />
-              </div>
+                        <div className="flex h-[80px] w-[80px]">
+            <img
+              src="/logo.png"
+              alt="Anupam Health Care Logo"
+              className="h-full w-full object-contain p-1"
+            />
+          </div>
               <div>
                 <p className="text-lg font-bold tracking-wide">ANUPAM</p>
                 <p className="text-[9px] font-semibold tracking-[0.15em] text-brand-green">
@@ -98,7 +97,7 @@ export default function Footer() {
           <div>
             <h4 className="text-sm font-semibold tracking-wider text-white/90">Our Services</h4>
             <ul className="mt-4 space-y-2.5">
-              {SERVICES_LIST.map((service) => (
+              {servicesList.map((service) => (
                 <li key={service.slug}>
                   <a
                     href={`/services/${service.slug}`}

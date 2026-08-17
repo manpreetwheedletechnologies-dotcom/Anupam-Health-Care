@@ -4,14 +4,14 @@ import { useState, FormEvent } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Phone, Mail, MapPin, Clock, ChevronDown } from "lucide-react";
-import { SERVICES } from "@/lib/services";
-
-const AREAS = ["Raj Nagar", "Indirapuram", "Vaishali", "Other Ghaziabad"];
+import { useSiteData, AREAS } from "@/context/SiteDataContext";
+import { submitLead } from "@/lib/api";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
 export default function ContactUsPage() {
   const [status, setStatus] = useState<Status>("idle");
+  const { services } = useSiteData();
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -27,15 +27,7 @@ export default function ContactUsPage() {
     };
 
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000"}/leads`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
-      if (!res.ok) throw new Error("Request failed");
+      await submitLead(payload);
       setStatus("success");
       form.reset();
     } catch {
@@ -137,7 +129,7 @@ export default function ContactUsPage() {
                 <option value="" disabled>
                   Select service needed
                 </option>
-                {SERVICES.map((s) => (
+                {services.map((s) => (
                   <option key={s.title}>{s.title}</option>
                 ))}
               </select>

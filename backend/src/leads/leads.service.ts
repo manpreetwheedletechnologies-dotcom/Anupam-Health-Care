@@ -1,43 +1,62 @@
-import { Injectable } from "@nestjs/common";
-import { randomUUID } from "crypto";
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { PrismaService } from "../prisma.service";
 import { CreateLeadDto } from "./dto/create-lead.dto";
+import { UpdateLeadDto } from "./dto/update-lead.dto";
 
-export interface Lead extends CreateLeadDto {
-  id: string;
-  createdAt: Date;
-}
-
-/**
- * In-memory store — good enough to wire up the frontend and test the
- * flow end to end. Swap this for Prisma + Postgres when ready:
- *
- *   model Lead {
- *     id        String   @id @default(uuid())
- *     name      String
- *     phone     String
- *     service   String
- *     area      String
- *     createdAt DateTime @default(now())
- *   }
- *
- * Then replace the array below with `this.prisma.lead.create(...)` /
- * `findMany()` calls.
- */
 @Injectable()
 export class LeadsService {
-  private leads: Lead[] = [];
+  constructor(private readonly prisma: PrismaService) {}
 
-  create(dto: CreateLeadDto): Lead {
-    const lead: Lead = {
-      ...dto,
-      id: randomUUID(),
-      createdAt: new Date(),
-    };
-    this.leads.push(lead);
-    return lead;
+  create(dto: CreateLeadDto) {
+    return this.prisma.lead.create({ data: { ...dto, status: "new" } });
   }
 
-  findAll(): Lead[] {
-    return this.leads;
+  findAll() {
+    return this.prisma.lead.findMany({ orderBy: { createdAt: "desc" } });
+  }
+
+  async updateStatus(id: string, dto: UpdateLeadDto) {
+    await this.ensureExists(id);
+    return this.prisma.lead.update({ where: { id }, data: { status: dto.status } });
+  }
+
+  async remove(id: string) {
+    await this.ensureExists(id);
+    await this.prisma.lead.delete({ where: { id } });
+    return { success: true };
+  }
+
+  async stats() {
+    const [total, newLeads, converted, services, packages, testimonials, team, blog] =
+      await Promise.all([
+        this.prisma.lead.count(),
+        this.prisma.lead.count({ where: { status: "new" } }),
+        this.prisma.lead.count({ where: { status: "converted" } }),
+        this.prisma.service.count(),
+        this.prisma.package.count(),
+        this.prisma.testimonial.count(),
+        this.prisma.teamMember.count(),
+        this.prisma.blogPost.count(),
+      ]);
+
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    const leadsToday = await this.prisma.lead.count({
+      where: { createdAt: { gte: startOfToday } },
+    });
+
+    return {
+      totalLeads: total,
+      newLeads,
+      convertedLeads: converted,
+      leadsToday,
+      counts: { services, packages, testimonials, team, blog },
+    };
+  }
+
+  private async ensureExists(id: string) {
+    const row = await this.prisma.lead.findUnique({ where: { id } });
+    if (!row) throw new NotFoundException("Lead not found");
+    return row;
   }
 }

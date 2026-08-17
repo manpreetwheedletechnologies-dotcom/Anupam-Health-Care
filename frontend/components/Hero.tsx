@@ -6,17 +6,8 @@ import {
   Ambulance, Target, Heart, TrendingUp, ArrowRight, CheckCircle 
 } from "lucide-react";
 import Image from "next/image";
-
-const SERVICES = [
-  "Nursing care",
-  "Elder care",
-  "Equipment on rent",
-  "Blood sample collection",
-  "Physiotherapy",
-  "Doctor consult",
-];
-
-const AREAS = ["Raj Nagar", "Indirapuram", "Vaishali", "Other Ghaziabad"];
+import { useSiteData, AREAS } from "@/context/SiteDataContext";
+import { submitLead } from "@/lib/api";
 
 const FEATURES = [
   { 
@@ -55,6 +46,7 @@ type Status = "idle" | "submitting" | "success" | "error";
 
 export default function Hero() {
   const [status, setStatus] = useState<Status>("idle");
+  const { services } = useSiteData();
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -69,15 +61,7 @@ export default function Hero() {
     };
 
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000"}/leads`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
-      if (!res.ok) throw new Error("Request failed");
+      await submitLead(payload);
       setStatus("success");
       form.reset();
       setTimeout(() => setStatus("idle"), 5000);
@@ -255,8 +239,8 @@ export default function Hero() {
                     <option value="" disabled className="text-gray-400">
                       Select service needed
                     </option>
-                    {SERVICES.map((s) => (
-                      <option key={s}>{s}</option>
+                    {services.map((s) => (
+                      <option key={s.slug}>{s.title}</option>
                     ))}
                   </select>
                   <ChevronDown

@@ -1,6 +1,9 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Calendar, ArrowRight } from "lucide-react";
+import { getBlogPosts } from "@/lib/api";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Blogs & Resources | Anupam Health Care Services",
@@ -8,34 +11,9 @@ export const metadata = {
     "Guides and resources on home nursing, elder care, and recovering safely at home from Anupam Health Care Services.",
 };
 
-const POSTS = [
-  {
-    title: "5 signs your elderly parent may need a home attendant",
-    date: "August 2026",
-    excerpt:
-      "Common signs to watch for — and how a GDA attendant can help your family manage day-to-day care safely.",
-  },
-  {
-    title: "Post-surgery recovery at home: a simple checklist",
-    date: "July 2026",
-    excerpt:
-      "What to prepare before a patient comes home after surgery, from equipment to wound care routines.",
-  },
-  {
-    title: "Choosing between a nurse and a GDA attendant",
-    date: "July 2026",
-    excerpt:
-      "Understanding the difference in training and scope so you book the right kind of support.",
-  },
-  {
-    title: "Home blood sample collection: what to expect",
-    date: "June 2026",
-    excerpt:
-      "How the process works, how to prepare, and how soon you'll get results.",
-  },
-];
+export default async function BlogPage() {
+  const posts = await getBlogPosts().catch(() => []);
 
-export default function BlogPage() {
   return (
     <main className="min-h-screen bg-white">
       <Header />
@@ -54,26 +32,30 @@ export default function BlogPage() {
       </section>
 
       <section className="mx-auto max-w-4xl px-5 py-14 md:px-8">
-        <div className="grid gap-5 sm:grid-cols-2">
-          {POSTS.map((post) => (
-            <a
-              key={post.title}
-              href="#"
-              className="group rounded-2xl border border-gray-100 p-6 shadow-card transition hover:-translate-y-1 hover:shadow-cardHover"
-            >
-              <span className="flex items-center gap-1.5 text-xs text-gray-400">
-                <Calendar size={12} /> {post.date}
-              </span>
-              <p className="mt-2 text-base font-semibold text-gray-900">
-                {post.title}
-              </p>
-              <p className="mt-2 text-sm text-gray-500">{post.excerpt}</p>
-              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand-navy">
-                Read more <ArrowRight size={14} />
-              </span>
-            </a>
-          ))}
-        </div>
+        {posts.length === 0 ? (
+          <p className="text-center text-sm text-gray-400">New posts coming soon.</p>
+        ) : (
+          <div className="grid gap-5 sm:grid-cols-2">
+            {posts.map((post) => (
+              <a
+                key={post.id}
+                href={`/blog/${post.slug}`}
+                className="group rounded-2xl border border-gray-100 p-6 shadow-card transition hover:-translate-y-1 hover:shadow-cardHover"
+              >
+                <span className="flex items-center gap-1.5 text-xs text-gray-400">
+                  <Calendar size={12} /> {post.date}
+                </span>
+                <p className="mt-2 text-base font-semibold text-gray-900">
+                  {post.title}
+                </p>
+                <p className="mt-2 text-sm text-gray-500">{post.excerpt}</p>
+                <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand-navy">
+                  Read more <ArrowRight size={14} />
+                </span>
+              </a>
+            ))}
+          </div>
+        )}
       </section>
 
       <Footer />

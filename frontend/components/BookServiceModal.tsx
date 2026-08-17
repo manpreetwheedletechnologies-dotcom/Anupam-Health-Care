@@ -3,14 +3,14 @@
 import { useState, FormEvent, useEffect } from "react";
 import { X, ChevronDown, CheckCircle, Shield } from "lucide-react";
 import { useBookingModal } from "@/context/BookingModalContext";
-import { SERVICES } from "@/lib/services";
-
-const AREAS = ["Raj Nagar", "Indirapuram", "Vaishali", "Other Ghaziabad"];
+import { useSiteData, AREAS } from "@/context/SiteDataContext";
+import { submitLead } from "@/lib/api";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
 export default function BookServiceModal() {
   const { isOpen, closeModal } = useBookingModal();
+  const { services } = useSiteData();
   const [status, setStatus] = useState<Status>("idle");
 
   // Lock background scroll while modal is open, close on Escape.
@@ -41,15 +41,7 @@ export default function BookServiceModal() {
     };
 
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000"}/leads`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
-      if (!res.ok) throw new Error("Request failed");
+      await submitLead(payload);
       setStatus("success");
       form.reset();
     } catch {
@@ -108,7 +100,7 @@ export default function BookServiceModal() {
               <option value="" disabled>
                 Select service needed
               </option>
-              {SERVICES.map((s) => (
+              {services.map((s) => (
                 <option key={s.title}>{s.title}</option>
               ))}
             </select>

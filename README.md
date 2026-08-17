@@ -51,3 +51,28 @@ comment block in that file for the schema to use).
 - Admin view to see submitted leads
 - Prisma + Postgres wiring for the backend
 - Blog / CMS content
+
+
+
+Drop your service photos into this folder using these EXACT filenames
+(JPG format, landscape orientation works best — roughly 600x400px or larger).
+Once a file is added here, it will automatically show up on:
+  - the Services grid on the homepage
+  - the /services listing page
+  - the /services/[slug] detail page banner
+ 
+No code changes needed — just add the file with the matching name below.
+ 
+  nursing-care.jpg              -> Nursing Staff
+  elder-care.jpg                -> GDA Staff
+  equipment-rent.jpg            -> All Medical Equipment on Rent
+  blood-sample-collection.jpg   -> Blood Sample Collection at Home
+  patient-care.jpg              -> Patient Care at Home
+  physiotherapy-at-home.jpg     -> Physiotherapy at Home
+  doctor-consultation.jpg       -> Doctor Consultation
+  ambulance-service.jpg         -> Ambulance Service
+  quality-care-at-home.jpg      -> Quality Care at Home
+  24x7-customer-support.jpg     -> 24x7 Customer Support
+ 
+If you'd rather use .png instead of .jpg for any of these, just update the
+matching "image" path in lib/services.ts to end in .png instead.

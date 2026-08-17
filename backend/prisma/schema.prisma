@@ -1,0 +1,117 @@
+// Prisma schema for Anupam Health Care Services — MongoDB
+// Every model/service/controller in this backend talks to Prisma Client
+// the same way regardless of database, so this file + .env + the "push"
+// step are the only Mongo-specific parts.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Content models (all editable from the admin dashboard) ----------
+
+model Service {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  slug      String   @unique
+  desc      String
+  icon      String   // lucide-react icon name, e.g. "UserRound"
+  color     String   @default("navy") // "navy" | "green"
+  bg        String   @default("sky")  // "sky" | "greenLight"
+  image     String   @default("/images/services/default.jpg")
+  features  String   @default("[]") // JSON string array
+  order     Int      @default(0)
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Package {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  name       String
+  price      String
+  desc       String
+  features   String   @default("[]") // JSON string array
+  equipment  String   @default("[]") // JSON string array
+  services   String   @default("[]") // JSON string array (tags used by the comparison table)
+  bestFor    String   @default("")
+  duration   String   @default("")
+  savings    String   @default("")
+  rating     Float    @default(4.5)
+  popular    Boolean  @default(false)
+  order      Int      @default(0)
+  published  Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Testimonial {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  location  String
+  quote     String
+  rating    Int      @default(5)
+  date      String   @default("Recently")
+  service   String   @default("")
+  image     String   @default("")
+  order     Int      @default(0)
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TeamMember {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  role      String
+  desc      String
+  image     String   @default("")
+  order     Int      @default(0)
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BlogPost {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  slug      String   @unique
+  excerpt   String
+  content   String   @default("")
+  date      String   @default("")
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Lead {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  phone     String
+  service   String
+  area      String
+  status    String   @default("new") // new | contacted | converted | closed
+  createdAt DateTime @default(now())
+}
+
+// ---------- Admin user (dashboard login) ----------
+
+model User {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  email        String   @unique
+  passwordHash String
+  name         String   @default("Admin")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// ---------- Site settings (phone number, WhatsApp, header stats, etc.) ----------
+
+model SiteSetting {
+  key   String @id @map("_id")
+  value String
+}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Phone,
   Menu,
@@ -11,8 +12,9 @@ import {
   ChevronDown,
   CalendarCheck,
 } from "lucide-react";
-import { SERVICES } from "@/lib/services";
 import { useBookingModal } from "@/context/BookingModalContext";
+import { useSiteData } from "@/context/SiteDataContext";
+import { getIcon } from "@/lib/icons";
 
 const NAV_LINKS = [
   { label: "About", href: "/about" },
@@ -24,14 +26,39 @@ const NAV_LINKS = [
 export default function Header() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
   const servicesRef = useRef<HTMLDivElement>(null);
+  const lastScrollY = useRef(0);
   const { openModal } = useBookingModal();
+  const { services } = useSiteData();
+  const pathname = usePathname();
+
+  // Helper: exact match for "/" ; startsWith for everything else so
+  // nested routes (e.g. /services/xyz) still mark the parent active.
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
+
+  const isServicesActive = pathname.startsWith("/services");
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", handleScroll);
+    const handleScroll = () => {
+      const currentY = window.scrollY;
+      setScrolled(currentY > 10);
+
+      // Hide header while scrolling down (past the initial 100px),
+      // bring it back as soon as the user scrolls up.
+      if (currentY > lastScrollY.current && currentY > 100) {
+        setHidden(true);
+        setServicesOpen(false);
+        setOpen(false);
+      } else {
+        setHidden(false);
+      }
+      lastScrollY.current = currentY;
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -48,13 +75,20 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
+  // Close mobile menu / dropdowns whenever the route changes
+  useEffect(() => {
+    setOpen(false);
+    setServicesOpen(false);
+    setMobileServicesOpen(false);
+  }, [pathname]);
+
   return (
     <header
       className={`sticky top-0 z-50 transition-all duration-300 ${
         scrolled
           ? "bg-white/95 backdrop-blur-md shadow-sm"
           : "bg-white/90 backdrop-blur-sm"
-      }`}
+      } ${hidden ? "-translate-y-full" : "translate-y-0"}`}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3 md:px-8">
         <Link href="/" className="flex items-center gap-2.5 group">
@@ -81,40 +115,58 @@ export default function Header() {
               type="button"
               onClick={() => setServicesOpen((v) => !v)}
               aria-expanded={servicesOpen}
-              className="flex items-center gap-1 transition-colors hover:text-brand-navy"
+              className={`flex items-center gap-1 transition-colors hover:text-brand-navy ${
+                isServicesActive ? "text-brand-navy" : ""
+              }`}
             >
-              Services
+              Patient Services
               <ChevronDown
                 size={14}
                 className={`transition-transform ${servicesOpen ? "rotate-180" : ""}`}
               />
             </button>
+            {/* underline indicator for Services, matches the style used on NAV_LINKS */}
+            <span
+              className={`absolute -bottom-1 left-0 h-0.5 bg-brand-green transition-all ${
+                isServicesActive ? "w-full" : "w-0"
+              }`}
+            />
 
             {servicesOpen && (
-              <div className="absolute left-1/2 top-full mt-3 w-[560px] -translate-x-1/2 rounded-2xl border border-gray-100 bg-white p-4 shadow-2xl">
+              <div className="absolute left-1/2 top-full z-50 mt-3 w-[560px] -translate-x-1/2 rounded-2xl border border-gray-100 bg-white p-4 shadow-2xl">
                 <div className="grid grid-cols-2 gap-1.5">
-                  {SERVICES.map(({ title, desc, icon: Icon, color, slug }) => (
-                    <Link
-                      key={slug}
-                      href={`/services/${slug}`}
-                      onClick={() => setServicesOpen(false)}
-                      className="flex items-start gap-3 rounded-xl p-2.5 transition hover:bg-brand-sky/40"
-                    >
-                      <div
-                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
-                          color === "navy" ? "bg-brand-navy" : "bg-brand-green"
+                  {services.map(({ title, desc, icon, color, slug }) => {
+                    const active = isActive(`/services/${slug}`);
+                    const Icon = getIcon(icon);
+                    return (
+                      <Link
+                        key={slug}
+                        href={`/services/${slug}`}
+                        onClick={() => setServicesOpen(false)}
+                        className={`flex items-start gap-3 rounded-xl p-2.5 transition hover:bg-brand-sky/40 ${
+                          active ? "bg-brand-sky/50" : ""
                         }`}
                       >
-                        <Icon size={16} className="text-white" />
-                      </div>
-                      <div>
-                        <p className="text-[13px] font-semibold text-gray-900">
-                          {title}
-                        </p>
-                        <p className="text-[11px] text-gray-500">{desc}</p>
-                      </div>
-                    </Link>
-                  ))}
+                        <div
+                          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
+                            color === "navy" ? "bg-brand-navy" : "bg-brand-green"
+                          }`}
+                        >
+                          <Icon size={16} className="text-white" />
+                        </div>
+                        <div>
+                          <p
+                            className={`text-[13px] font-semibold ${
+                              active ? "text-brand-navy" : "text-gray-900"
+                            }`}
+                          >
+                            {title}
+                          </p>
+                          <p className="text-[11px] text-gray-500">{desc}</p>
+                        </div>
+                      </Link>
+                    );
+                  })}
                 </div>
                 <Link
                   href="/services"
@@ -127,24 +179,25 @@ export default function Header() {
             )}
           </div>
 
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.label}
-              href={link.href}
-              className="relative transition-colors hover:text-brand-navy after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-brand-green after:transition-all hover:after:w-full"
-            >
-              {link.label}
-            </Link>
-          ))}
+          {NAV_LINKS.map((link) => {
+            const active = isActive(link.href);
+            return (
+              <Link
+                key={link.label}
+                href={link.href}
+                className={`relative transition-colors hover:text-brand-navy after:absolute after:bottom-0 after:left-0 after:h-0.5 after:bg-brand-green after:transition-all hover:after:w-full ${
+                  active
+                    ? "text-brand-navy after:w-full"
+                    : "after:w-0"
+                }`}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="flex items-center gap-3">
-          <a
-            href="tel:7011598306"
-            className="hidden items-center gap-1.5 text-sm font-medium text-brand-navy lg:flex"
-          >
-            <Phone size={14} /> 7011598306
-          </a>
           <button
             type="button"
             onClick={openModal}
@@ -165,12 +218,14 @@ export default function Header() {
       </div>
 
       {open && (
-        <div className="animate-slide-down border-t border-gray-100 bg-white px-5 py-4 md:hidden">
+        <div className="animate-slide-down relative z-50 border-t border-gray-100 bg-white px-5 py-4 md:hidden">
           <nav className="flex flex-col gap-1 text-sm font-medium text-gray-700">
             <button
               type="button"
               onClick={() => setMobileServicesOpen((v) => !v)}
-              className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-brand-sky/30"
+              className={`flex items-center justify-between py-2 px-3 rounded-lg hover:bg-brand-sky/30 ${
+                isServicesActive ? "bg-brand-sky/30 text-brand-navy" : ""
+              }`}
             >
               Services
               <ChevronDown
@@ -180,16 +235,23 @@ export default function Header() {
             </button>
             {mobileServicesOpen && (
               <div className="ml-3 flex flex-col gap-1 border-l border-gray-100 pl-3">
-                {SERVICES.map((s) => (
-                  <Link
-                    key={s.slug}
-                    href={`/services/${s.slug}`}
-                    onClick={() => setOpen(false)}
-                    className="py-1.5 px-2 text-[13px] text-gray-600 hover:text-brand-navy"
-                  >
-                    {s.title}
-                  </Link>
-                ))}
+                {services.map((s) => {
+                  const active = isActive(`/services/${s.slug}`);
+                  return (
+                    <Link
+                      key={s.slug}
+                      href={`/services/${s.slug}`}
+                      onClick={() => setOpen(false)}
+                      className={`py-1.5 px-2 text-[13px] hover:text-brand-navy ${
+                        active
+                          ? "font-semibold text-brand-navy"
+                          : "text-gray-600"
+                      }`}
+                    >
+                      {s.title}
+                    </Link>
+                  );
+                })}
                 <Link
                   href="/services"
                   onClick={() => setOpen(false)}
@@ -200,16 +262,23 @@ export default function Header() {
               </div>
             )}
 
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className="py-2 px-3 rounded-lg hover:bg-brand-sky/30 transition-colors"
-              >
-                {link.label}
-              </Link>
-            ))}
+            {NAV_LINKS.map((link) => {
+              const active = isActive(link.href);
+              return (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  onClick={() => setOpen(false)}
+                  className={`py-2 px-3 rounded-lg transition-colors hover:bg-brand-sky/30 ${
+                    active
+                      ? "bg-brand-sky/30 font-semibold text-brand-navy"
+                      : ""
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
 
             <button
               type="button"

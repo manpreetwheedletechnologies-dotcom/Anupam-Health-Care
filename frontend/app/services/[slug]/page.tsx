@@ -1,16 +1,18 @@
 import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { SERVICES } from "@/lib/services";
+import Image from "next/image";
+import { getServiceBySlug } from "@/lib/api";
+import { getIcon } from "@/lib/icons";
 import { CheckCircle, Phone } from "lucide-react";
 import BookServiceButton from "@/components/BookServiceButton";
 
-export function generateStaticParams() {
-  return SERVICES.map((s) => ({ slug: s.slug }));
-}
+// Service content is managed live from the admin dashboard, so render
+// this on every request rather than caching a stale set of slugs.
+export const dynamic = "force-dynamic";
 
-export function generateMetadata({ params }: { params: { slug: string } }) {
-  const service = SERVICES.find((s) => s.slug === params.slug);
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  const service = await getServiceBySlug(params.slug).catch(() => null);
   if (!service) return {};
   return {
     title: `${service.title} | Anupam Health Care Services`,
@@ -18,24 +20,30 @@ export function generateMetadata({ params }: { params: { slug: string } }) {
   };
 }
 
-export default function ServiceDetailPage({
+export default async function ServiceDetailPage({
   params,
 }: {
   params: { slug: string };
 }) {
-  const service = SERVICES.find((s) => s.slug === params.slug);
+  const service = await getServiceBySlug(params.slug).catch(() => null);
   if (!service) notFound();
 
-  const { title, desc, icon: Icon, color, features } = service;
+  const { title, desc, icon, color, features, image } = service;
+  const Icon = getIcon(icon);
 
   return (
     <main className="min-h-screen bg-white">
       <Header />
 
+      <section className="relative h-56 w-full overflow-hidden sm:h-72 md:h-80">
+        <Image src={image} alt={title} fill className="object-cover" priority />
+        <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/70 via-brand-navy/20 to-transparent" />
+      </section>
+
       <section className="bg-brand-sky/40 px-5 py-14 md:px-8">
         <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
           <div
-            className={`mb-4 flex h-16 w-16 items-center justify-center rounded-full ${
+            className={`-mt-20 mb-4 flex h-16 w-16 items-center justify-center rounded-full border-4 border-white shadow-md ${
               color === "navy" ? "bg-brand-navy" : "bg-brand-green"
             }`}
           >

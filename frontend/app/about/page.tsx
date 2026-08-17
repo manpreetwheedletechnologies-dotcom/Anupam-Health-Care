@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import Image from "next/image";
 import { Heart, ShieldCheck, UserCheck, HeartHandshake } from "lucide-react";
 
 export const metadata = {
@@ -51,15 +52,23 @@ export default function AboutPage() {
             needed — day or night.
           </p>
         </div>
-        <div className="rounded-2xl bg-brand-navy p-8 text-white">
-          <p className="text-sm font-semibold text-emerald-200">
-            Founder & Care Provider
-          </p>
-          <p className="mt-2 text-2xl font-bold">Aakash Kaushik</p>
-          <p className="mt-4 text-sm italic text-blue-100">
-            "Committed to your health and well-being — every family deserves
-            care they can trust."
-          </p>
+        <div className="relative h-72 overflow-hidden rounded-2xl shadow-card md:h-full">
+          <Image
+            src="/images/nurse-patient-care.png"
+            alt="Anupam Health Care nurse caring for a patient at home"
+            fill
+            className="object-cover"
+          />
+          <div className="absolute inset-x-4 bottom-4 rounded-xl bg-brand-navy/90 backdrop-blur-sm p-4 text-white">
+            <p className="text-xs font-semibold text-emerald-200">
+              Founder & Care Provider
+            </p>
+            <p className="mt-1 text-lg font-bold">Aakash Kaushik</p>
+            <p className="mt-2 text-xs italic text-blue-100">
+              "Committed to your health and well-being — every family
+              deserves care they can trust."
+            </p>
+          </div>
         </div>
       </section>
 

@@ -1,32 +1,41 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Headers,
-  Post,
-  UnauthorizedException,
-} from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from "@nestjs/common";
 import { LeadsService } from "./leads.service";
 import { CreateLeadDto } from "./dto/create-lead.dto";
+import { UpdateLeadDto } from "./dto/update-lead.dto";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 
 @Controller("leads")
 export class LeadsController {
   constructor(private readonly leadsService: LeadsService) {}
 
+  // Public — the booking form on the site posts here.
   @Post()
   create(@Body() dto: CreateLeadDto) {
     return this.leadsService.create(dto);
   }
 
-  // Admin view — requires the x-admin-key header to match ADMIN_API_KEY.
-  // Leads contain names and phone numbers, so this must not be public.
-  // Swap for real auth (JWT/session) when this moves past a prototype.
+  // Everything below needs a valid admin JWT (see /auth/login).
+  @UseGuards(JwtAuthGuard)
   @Get()
-  findAll(@Headers("x-admin-key") adminKey?: string) {
-    const expected = process.env.ADMIN_API_KEY;
-    if (!expected || adminKey !== expected) {
-      throw new UnauthorizedException("Invalid or missing admin key");
-    }
+  findAll() {
     return this.leadsService.findAll();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get("stats")
+  stats() {
+    return this.leadsService.stats();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch(":id")
+  updateStatus(@Param("id") id: string, @Body() dto: UpdateLeadDto) {
+    return this.leadsService.updateStatus(id, dto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(":id")
+  remove(@Param("id") id: string) {
+    return this.leadsService.remove(id);
   }
 }
