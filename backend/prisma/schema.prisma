@@ -16,18 +16,21 @@ datasource db {
 
 model Service {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  title     String
-  slug      String   @unique
-  desc      String
-  icon      String   // lucide-react icon name, e.g. "UserRound"
-  color     String   @default("navy") // "navy" | "green"
-  bg        String   @default("sky")  // "sky" | "greenLight"
-  image     String   @default("/images/services/default.jpg")
-  features  String   @default("[]") // JSON string array
-  order     Int      @default(0)
-  published Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  title       String
+  slug        String   @unique
+  desc        String
+  longDesc    String   @default("") // fuller "about this service" paragraph shown on the detail page
+  icon        String   // lucide-react icon name, e.g. "UserRound"
+  color       String   @default("navy") // "navy" | "green"
+  bg          String   @default("sky")  // "sky" | "greenLight"
+  image       String   @default("/images/services/default.jpg")
+  features    String   @default("[]") // JSON string array — "What's included"
+  benefits    String   @default("[]") // JSON string array — "Why choose this"
+  process     String   @default("[]") // JSON string array — ordered "How it works" steps
+  order       Int      @default(0)
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Package {
@@ -82,6 +85,7 @@ model BlogPost {
   slug      String   @unique
   excerpt   String
   content   String   @default("")
+  image     String   @default("")
   date      String   @default("")
   published Boolean  @default(true)
   createdAt DateTime @default(now())
@@ -89,13 +93,17 @@ model BlogPost {
 }
 
 model Lead {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
-  phone     String
-  service   String
-  area      String
-  status    String   @default("new") // new | contacted | converted | closed
-  createdAt DateTime @default(now())
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  phone         String
+  service       String
+  area          String
+  status        String   @default("new") // new | contacted | confirmed | converted | closed
+  preferredDate String   @default("") // what the customer asked for, e.g. "2026-08-20"
+  preferredTime String   @default("") // customer's preferred slot, e.g. "Morning (9 AM - 12 PM)"
+  confirmedDate String   @default("") // set by admin once the appointment is scheduled
+  confirmedTime String   @default("") // set by admin, e.g. "10:30"
+  createdAt     DateTime @default(now())
 }
 
 // ---------- Admin user (dashboard login) ----------
@@ -107,6 +115,23 @@ model User {
   name         String   @default("Admin")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+}
+
+// ---------- About page content (singleton — one document, editable from the admin dashboard) ----------
+
+model AboutContent {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  heroTitle       String   @default("Care beyond compare")
+  heroSubtitle    String   @default("Anupam Health Care Services was founded to bring reliable, compassionate healthcare into people's homes — for the families who want their loved ones cared for the way they would care for them themselves.")
+  storyParagraph1 String   @default("Anupam Health Care Services started with a simple idea — that good medical care shouldn't stop at the hospital door. Based in Raj Nagar, Ghaziabad, we work with qualified nurses, GDA staff and physiotherapists to bring nursing, elder care, equipment rental, and doctor consultations directly to people's homes.")
+  storyParagraph2 String   @default("Every family we work with gets the same promise: expert care, verified staff, and support that's available whenever it's needed — day or night.")
+  storyImage      String   @default("/images/nurse-patient-care.png")
+  founderName     String   @default("Aakash Kaushik")
+  founderRole     String   @default("Founder & Care Provider")
+  founderQuote    String   @default("Committed to your health and well-being — every family deserves care they can trust.")
+  missionText     String   @default("To make quality healthcare accessible at home — so families never have to choose between comfort and proper medical care for their loved ones.")
+  visionText      String   @default("To be Ghaziabad's most trusted name in home healthcare — known for verified staff, fast response, and care that families can rely on.")
+  updatedAt       DateTime @updatedAt
 }
 
 // ---------- Site settings (phone number, WhatsApp, header stats, etc.) ----------

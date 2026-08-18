@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Quote, ChevronLeft, ChevronRight, Star, Calendar, MessageCircle, Users } from "lucide-react";
 import { useSiteData } from "@/context/SiteDataContext";
+import { resolveImageUrl } from "@/lib/api";
 
 const StarRating = ({ rating }: { rating: number }) => (
   <div className="flex gap-0.5">
@@ -113,7 +114,7 @@ export default function Testimonials() {
               <div className="relative flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-brand-navy to-brand-navy/80 p-8 text-center md:items-start md:text-left">
                 <div className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-white/5" />
                 <div className="relative h-20 w-20 overflow-hidden rounded-full ring-4 ring-white/20">
-                  <img src={review.image} alt={review.name} className="h-full w-full object-cover" />
+                  <img src={resolveImageUrl(review.image)} alt={review.name} className="h-full w-full object-cover" />
                 </div>
                 <div>
                   <p className="text-lg font-semibold text-white">{review.name}</p>

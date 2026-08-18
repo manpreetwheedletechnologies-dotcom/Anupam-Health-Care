@@ -135,7 +135,7 @@ export default function Header() {
             {servicesOpen && (
               <div className="absolute left-1/2 top-full z-50 mt-3 w-[560px] -translate-x-1/2 rounded-2xl border border-gray-100 bg-white p-4 shadow-2xl">
                 <div className="grid grid-cols-2 gap-1.5">
-                  {services.map(({ title, desc, icon, color, slug }) => {
+                  {services.slice(0, 6).map(({ title, desc, icon, color, slug }) => {
                     const active = isActive(`/services/${slug}`);
                     const Icon = getIcon(icon);
                     return (
@@ -173,7 +173,9 @@ export default function Header() {
                   onClick={() => setServicesOpen(false)}
                   className="mt-2 block rounded-xl bg-brand-navy/5 py-2 text-center text-xs font-semibold text-brand-navy hover:bg-brand-navy/10"
                 >
-                  View all services →
+                  {services.length > 6
+                    ? `More services (+${services.length - 6}) →`
+                    : "View all services →"}
                 </Link>
               </div>
             )}
@@ -235,7 +237,7 @@ export default function Header() {
             </button>
             {mobileServicesOpen && (
               <div className="ml-3 flex flex-col gap-1 border-l border-gray-100 pl-3">
-                {services.map((s) => {
+                {services.slice(0, 6).map((s) => {
                   const active = isActive(`/services/${s.slug}`);
                   return (
                     <Link
@@ -257,7 +259,9 @@ export default function Header() {
                   onClick={() => setOpen(false)}
                   className="py-1.5 px-2 text-[13px] font-semibold text-brand-navy"
                 >
-                  View all services →
+                  {services.length > 6
+                    ? `More services (+${services.length - 6}) →`
+                    : "View all services →"}
                 </Link>
               </div>
             )}

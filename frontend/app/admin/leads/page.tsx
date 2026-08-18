@@ -1,18 +1,43 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Phone, Trash2 } from "lucide-react";
+import { Loader2, Phone, Trash2, CalendarCheck, CalendarClock, Pencil, X } from "lucide-react";
 import { useAdminAuth } from "@/context/AdminAuthContext";
-import { adminGetLeads, adminUpdateLeadStatus, adminDeleteLead, LeadItem } from "@/lib/api";
+import {
+  adminGetLeads,
+  adminUpdateLeadStatus,
+  adminConfirmAppointment,
+  adminDeleteLead,
+  LeadItem,
+} from "@/lib/api";
 
-const STATUS_OPTIONS = ["new", "contacted", "converted", "closed"];
+const STATUS_OPTIONS = ["new", "contacted", "confirmed", "converted", "closed"];
 
 const STATUS_STYLES: Record<string, string> = {
   new: "bg-blue-50 text-blue-600",
   contacted: "bg-amber-50 text-amber-600",
+  confirmed: "bg-purple-50 text-purple-600",
   converted: "bg-green-50 text-green-600",
   closed: "bg-gray-100 text-gray-500",
 };
+
+function formatDate(dateStr: string) {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  return d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+}
+
+function formatTime(timeStr: string) {
+  if (!timeStr) return "";
+  // "HH:MM" (24h, from <input type="time">) -> "h:MM AM/PM"
+  const match = /^(\d{1,2}):(\d{2})$/.exec(timeStr);
+  if (!match) return timeStr; // already a slot label like "Morning (9 AM - 12 PM)"
+  const hour = parseInt(match[1], 10);
+  const period = hour >= 12 ? "PM" : "AM";
+  const displayHour = hour % 12 === 0 ? 12 : hour % 12;
+  return `${displayHour}:${match[2]} ${period}`;
+}
 
 export default function AdminLeadsPage() {
   const { token } = useAdminAuth();
@@ -20,12 +45,17 @@ export default function AdminLeadsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>("all");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [confirmDate, setConfirmDate] = useState("");
+  const [confirmTime, setConfirmTime] = useState("");
+  const [saving, setSaving] = useState(false);
 
   async function load() {
     if (!token) return;
     setLoading(true);
     try {
       const rows = await adminGetLeads(token);
+      console.log("Loaded leads:", rows); // Debug log
       setLeads(rows);
     } catch (err: any) {
       setError(err.message || "Failed to load leads");
@@ -49,6 +79,27 @@ export default function AdminLeadsPage() {
     }
   }
 
+  function openAppointmentEditor(lead: LeadItem) {
+    setEditingId(lead.id);
+    // Pre-fill with existing confirmed values, or fall back to what the customer requested.
+    setConfirmDate(lead.confirmedDate || lead.preferredDate || "");
+    setConfirmTime(lead.confirmedTime || lead.preferredTime || "");
+  }
+
+  async function saveAppointment(id: string) {
+    if (!token || !confirmDate) return;
+    setSaving(true);
+    try {
+      const updated = await adminConfirmAppointment(id, { confirmedDate: confirmDate, confirmedTime: confirmTime }, token);
+      setLeads((prev) => prev.map((l) => (l.id === id ? updated : l)));
+      setEditingId(null);
+    } catch (err: any) {
+      setError(err.message || "Failed to confirm appointment");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   async function remove(id: string) {
     if (!token) return;
     if (!confirm("Delete this lead?")) return;
@@ -63,12 +114,12 @@ export default function AdminLeadsPage() {
   const visible = filter === "all" ? leads : leads.filter((l) => l.status === filter);
 
   return (
-    <div>
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="max-w-4xl mx-auto p-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <div>
           <h1 className="text-lg font-bold text-brand-navy">Leads</h1>
           <p className="text-xs text-gray-400">
-            Everyone who submitted the booking form or contact form.
+            Everyone who submitted the booking form or contact form — confirm an appointment date/time here.
           </p>
         </div>
         <select
@@ -86,10 +137,10 @@ export default function AdminLeadsPage() {
       </div>
 
       {error && (
-        <div className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">{error}</div>
+        <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">{error}</div>
       )}
 
-      <div className="mt-5 overflow-x-auto rounded-xl border border-gray-100 bg-white">
+      <div className="overflow-hidden rounded-xl border border-gray-100 bg-white">
         {loading ? (
           <div className="flex items-center justify-center gap-2 py-14 text-sm text-gray-400">
             <Loader2 size={16} className="animate-spin" /> Loading...
@@ -97,67 +148,121 @@ export default function AdminLeadsPage() {
         ) : visible.length === 0 ? (
           <p className="py-14 text-center text-sm text-gray-400">No leads here yet.</p>
         ) : (
-          <table className="w-full min-w-[640px] text-sm">
-            <thead>
-              <tr className="border-b border-gray-100 text-left text-xs text-gray-400">
-                <th className="px-5 py-3 font-medium">Name</th>
-                <th className="px-5 py-3 font-medium">Phone</th>
-                <th className="px-5 py-3 font-medium">Service</th>
-                <th className="px-5 py-3 font-medium">Area</th>
-                <th className="px-5 py-3 font-medium">Received</th>
-                <th className="px-5 py-3 font-medium">Status</th>
-                <th className="px-5 py-3" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {visible.map((lead) => (
-                <tr key={lead.id} className="hover:bg-gray-50/60">
-                  <td className="px-5 py-3 font-medium text-gray-800">{lead.name}</td>
-                  <td className="px-5 py-3">
-                    <a
-                      href={`tel:${lead.phone}`}
-                      className="flex items-center gap-1.5 text-brand-navy hover:underline"
-                    >
-                      <Phone size={12} /> {lead.phone}
-                    </a>
-                  </td>
-                  <td className="px-5 py-3 text-gray-600">{lead.service}</td>
-                  <td className="px-5 py-3 text-gray-600">{lead.area}</td>
-                  <td className="px-5 py-3 text-xs text-gray-400">
-                    {new Date(lead.createdAt).toLocaleDateString("en-IN", {
-                      day: "numeric",
-                      month: "short",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </td>
-                  <td className="px-5 py-3">
-                    <select
-                      value={lead.status}
-                      onChange={(e) => updateStatus(lead.id, e.target.value)}
-                      className={`rounded-full border-0 px-2.5 py-1 text-xs font-semibold outline-none ${
-                        STATUS_STYLES[lead.status] ?? "bg-gray-100 text-gray-500"
-                      }`}
-                    >
-                      {STATUS_OPTIONS.map((s) => (
-                        <option key={s} value={s}>
-                          {s[0].toUpperCase() + s.slice(1)}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td className="px-5 py-3 text-right">
+          <ul className="divide-y divide-gray-50">
+            {visible.map((lead) => {
+              const isEditing = editingId === lead.id;
+              const hasConfirmed = !!lead.confirmedDate;
+              const hasRequested = !!lead.preferredDate;
+
+              return (
+                <li key={lead.id} className="px-5 py-4">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-medium text-gray-800">{lead.name}</p>
+                        <select
+                          value={lead.status}
+                          onChange={(e) => updateStatus(lead.id, e.target.value)}
+                          className={`rounded-full border-0 px-2.5 py-0.5 text-xs font-semibold outline-none ${
+                            STATUS_STYLES[lead.status] ?? "bg-gray-100 text-gray-500"
+                          }`}
+                        >
+                          {STATUS_OPTIONS.map((s) => (
+                            <option key={s} value={s}>
+                              {s[0].toUpperCase() + s.slice(1)}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500">
+                        <a href={`tel:${lead.phone}`} className="flex items-center gap-1 text-brand-navy hover:underline">
+                          <Phone size={11} /> {lead.phone}
+                        </a>
+                        <span>{lead.service}</span>
+                        <span>{lead.area}</span>
+                        <span className="text-gray-400">
+                          Received {formatDate(lead.createdAt)}
+                        </span>
+                      </div>
+                    </div>
                     <button
                       onClick={() => remove(lead.id)}
-                      className="rounded-md p-1.5 text-gray-300 hover:bg-red-50 hover:text-red-500"
+                      className="rounded-md p-1.5 text-gray-300 hover:bg-red-50 hover:text-red-500 flex-shrink-0"
                     >
                       <Trash2 size={14} />
                     </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </div>
+
+                  {/* Appointment info + confirm control */}
+                  <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg bg-gray-50 px-3 py-2.5">
+                    {hasConfirmed ? (
+                      <span className="flex items-center gap-1.5 text-xs font-medium text-green-600">
+                        <CalendarCheck size={13} />
+                        Confirmed: {formatDate(lead.confirmedDate)}
+                        {lead.confirmedTime && ` at ${formatTime(lead.confirmedTime)}`}
+                      </span>
+                    ) : hasRequested ? (
+                      <span className="flex items-center gap-1.5 text-xs text-gray-500">
+                        <CalendarClock size={13} />
+                        Requested: {formatDate(lead.preferredDate)}
+                        {lead.preferredTime && ` · ${formatTime(lead.preferredTime)}`}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-gray-400">No appointment requested</span>
+                    )}
+
+                    {!isEditing && (
+                      <button
+                        onClick={() => openAppointmentEditor(lead)}
+                        className="ml-auto flex items-center gap-1 rounded-lg border border-gray-200 bg-white px-2.5 py-1 text-xs font-semibold text-brand-navy hover:bg-brand-navy/5"
+                      >
+                        <Pencil size={11} />
+                        {hasConfirmed ? "Edit appointment" : "Confirm appointment"}
+                      </button>
+                    )}
+                  </div>
+
+                  {isEditing && (
+                    <div className="mt-2 flex flex-wrap items-end gap-2 rounded-lg border border-brand-navy/10 bg-blue-50/30 p-3">
+                      <div>
+                        <label className="text-[11px] font-medium text-gray-500">Date</label>
+                        <input
+                          type="date"
+                          value={confirmDate}
+                          onChange={(e) => setConfirmDate(e.target.value)}
+                          className="mt-0.5 block rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs outline-none focus:border-brand-navy"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-medium text-gray-500">Time</label>
+                        <input
+                          type="time"
+                          value={confirmTime}
+                          onChange={(e) => setConfirmTime(e.target.value)}
+                          className="mt-0.5 block rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs outline-none focus:border-brand-navy"
+                        />
+                      </div>
+                      <button
+                        onClick={() => saveAppointment(lead.id)}
+                        disabled={saving || !confirmDate}
+                        className="flex items-center gap-1 rounded-lg bg-brand-navy px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60 hover:bg-brand-navy/90 transition-colors"
+                      >
+                        {saving ? <Loader2 size={12} className="animate-spin" /> : <CalendarCheck size={12} />}
+                        Save
+                      </button>
+                      <button
+                        onClick={() => setEditingId(null)}
+                        className="flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-500 hover:bg-gray-50 transition-colors"
+                      >
+                        <X size={12} />
+                        Cancel
+                      </button>
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
         )}
       </div>
     </div>

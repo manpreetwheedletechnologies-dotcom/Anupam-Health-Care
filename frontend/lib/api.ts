@@ -4,16 +4,31 @@
 
 export const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
+// Images can be: a local /public asset ("/images/..."), a full external
+// URL (ui-avatars.com avatars), or a path returned by the admin upload
+// endpoint ("/uploads/xyz.jpg") which is relative to the BACKEND, not the
+// frontend. This resolves any of those into something safe to put in an
+// <img>/<Image> src.
+export function resolveImageUrl(path: string | null | undefined): string {
+  if (!path) return "";
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  if (path.startsWith("/uploads/")) return `${API_BASE}${path}`;
+  return path;
+}
+
 export type ServiceItem = {
   id: string;
   title: string;
   slug: string;
   desc: string;
+  longDesc: string;
   icon: string;
   color: "navy" | "green";
   bg: "sky" | "greenLight";
   image: string;
   features: string[];
+  benefits: string[];
+  process: string[];
   order: number;
   published: boolean;
 };
@@ -64,6 +79,7 @@ export type BlogPostItem = {
   slug: string;
   excerpt: string;
   content: string;
+  image: string;
   date: string;
   published: boolean;
 };
@@ -75,7 +91,25 @@ export type LeadItem = {
   service: string;
   area: string;
   status: string;
+  preferredDate: string;
+  preferredTime: string;
+  confirmedDate: string;
+  confirmedTime: string;
   createdAt: string;
+};
+
+export type AboutContentItem = {
+  id: string;
+  heroTitle: string;
+  heroSubtitle: string;
+  storyParagraph1: string;
+  storyParagraph2: string;
+  storyImage: string;
+  founderName: string;
+  founderRole: string;
+  founderQuote: string;
+  missionText: string;
+  visionText: string;
 };
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -109,6 +143,8 @@ export const submitLead = (payload: {
   phone: string;
   service: string;
   area: string;
+  preferredDate?: string;
+  preferredTime?: string;
 }) => request<LeadItem>("/leads", { method: "POST", body: JSON.stringify(payload) });
 
 // ---------- Admin auth ----------
@@ -166,6 +202,19 @@ export const adminUpdateLeadStatus = (id: string, status: string, token: string)
     body: JSON.stringify({ status }),
   });
 
+// Sets/updates the confirmed appointment date & time for a lead — used
+// by the "Confirm appointment" control in the admin leads page.
+export const adminConfirmAppointment = (
+  id: string,
+  data: { confirmedDate: string; confirmedTime: string },
+  token: string
+) =>
+  request<LeadItem>(`/leads/${id}`, {
+    method: "PATCH",
+    headers: authHeaders(token),
+    body: JSON.stringify({ ...data, status: "confirmed" }),
+  });
+
 export const adminDeleteLead = (id: string, token: string) =>
   request<{ success: boolean }>(`/leads/${id}`, {
     method: "DELETE",
@@ -177,6 +226,7 @@ export type DashboardStats = {
   newLeads: number;
   convertedLeads: number;
   leadsToday: number;
+  upcomingAppointments: number;
   counts: {
     services: number;
     packages: number;
@@ -188,3 +238,38 @@ export type DashboardStats = {
 
 export const adminGetStats = (token: string) =>
   request<DashboardStats>("/leads/stats", { headers: authHeaders(token) });
+
+// ---------- Admin: image upload ----------
+// Used by the "image" field type in ResourceManager (and the About page
+// editor) to upload a file and get back a URL to store on the record.
+
+export async function adminUploadImage(file: File, token: string): Promise<{ url: string }> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch(`${API_BASE}/uploads`, {
+    method: "POST",
+    headers: authHeaders(token), // no Content-Type — the browser sets the multipart boundary
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.message || `Upload failed (${res.status})`);
+  }
+  return res.json();
+}
+
+// ---------- About page content (singleton) ----------
+
+export const getAboutContent = () => request<AboutContentItem>("/about");
+
+export const adminGetAbout = (token: string) =>
+  request<AboutContentItem>("/about", { headers: authHeaders(token) });
+
+export const adminUpdateAbout = (token: string, data: Partial<AboutContentItem>) =>
+  request<AboutContentItem>("/about", {
+    method: "PATCH",
+    headers: authHeaders(token),
+    body: JSON.stringify(data),
+  });

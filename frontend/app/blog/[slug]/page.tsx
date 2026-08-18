@@ -1,8 +1,10 @@
 import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import Image from "next/image";
 import { Calendar, Phone } from "lucide-react";
-import { getBlogPostBySlug } from "@/lib/api";
+import { getBlogPostBySlug, resolveImageUrl } from "@/lib/api";
+import { renderBlogContent } from "@/lib/markdown";
 
 export const dynamic = "force-dynamic";
 
@@ -19,9 +21,24 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
   const post = await getBlogPostBySlug(params.slug).catch(() => null);
   if (!post) notFound();
 
+  const contentBlocks = renderBlogContent(post.content);
+
   return (
     <main className="min-h-screen bg-white">
       <Header />
+
+      {/* Banner — same treatment as the service detail pages */}
+      <section className="relative h-64 w-full overflow-hidden sm:h-80 md:h-96">
+        <Image
+          src={resolveImageUrl(post.image)}
+          alt={post.title}
+          fill
+          unoptimized
+          className="object-cover object-top"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/70 via-brand-navy/10 to-transparent" />
+      </section>
 
       <section className="bg-brand-sky/40 px-5 py-14 md:px-8">
         <div className="mx-auto max-w-3xl text-center">
@@ -36,10 +53,8 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
       </section>
 
       <section className="mx-auto max-w-3xl px-5 py-12 md:px-8">
-        {post.content ? (
-          <div className="prose prose-sm max-w-none whitespace-pre-wrap text-gray-700">
-            {post.content}
-          </div>
+        {contentBlocks.length > 0 ? (
+          <div className="space-y-4">{contentBlocks}</div>
         ) : (
           <p className="text-sm text-gray-400">Full article coming soon.</p>
         )}

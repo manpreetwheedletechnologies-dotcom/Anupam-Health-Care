@@ -2,8 +2,8 @@
 
 import { useState, FormEvent } from "react";
 import { 
-  Star, Clock, Users, ChevronDown, Phone, Shield, Award, 
-  Ambulance, Target, Heart, TrendingUp, ArrowRight, CheckCircle 
+  Clock, Users, ChevronDown, Phone, Shield, Award, 
+  Ambulance, Target, Heart, TrendingUp, ArrowRight, CheckCircle, Calendar
 } from "lucide-react";
 import Image from "next/image";
 import { useSiteData, AREAS } from "@/context/SiteDataContext";
@@ -30,16 +30,16 @@ const FEATURES = [
   },
 ];
 
-const STATS = [
-  { value: "500+", label: "Families Served", icon: Users, bg: "bg-brand-sky" },
-  { value: "4.9★", label: "Average Rating", icon: Star, bg: "bg-brand-greenLight" },
-  { value: "24/7", label: "Emergency Support", icon: Ambulance, bg: "bg-brand-sky" },
+const TIME_SLOTS = [
+  "Morning (9 AM - 12 PM)",
+  "Afternoon (12 PM - 4 PM)",
+  "Evening (4 PM - 8 PM)",
 ];
 
 const TRUST_BADGES = [
   { icon: Shield, label: "Verified Professionals" },
   { icon: Award, label: "Quality Assured" },
-  { icon: Clock, label: "Callback in 10 min" },
+  { icon: Clock, label: "Fast Callback" },
 ];
 
 type Status = "idle" | "submitting" | "success" | "error";
@@ -47,6 +47,13 @@ type Status = "idle" | "submitting" | "success" | "error";
 export default function Hero() {
   const [status, setStatus] = useState<Status>("idle");
   const { services } = useSiteData();
+
+  // Data-driven stats only — a service count we actually have, plus
+  // operational commitments (24/7), not invented review numbers.
+  const STATS = [
+    { value: `${services.length || "10"}+`, label: "Services Offered", icon: Users, bg: "bg-brand-sky" },
+    { value: "24/7", label: "Emergency Support", icon: Ambulance, bg: "bg-brand-greenLight" },
+  ];
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -58,6 +65,8 @@ export default function Hero() {
       phone: (form.elements.namedItem("phone") as HTMLInputElement).value,
       service: (form.elements.namedItem("service") as HTMLSelectElement).value,
       area: (form.elements.namedItem("area") as HTMLSelectElement).value,
+      preferredDate: (form.elements.namedItem("preferredDate") as HTMLInputElement)?.value || undefined,
+      preferredTime: (form.elements.namedItem("preferredTime") as HTMLSelectElement)?.value || undefined,
     };
 
     try {
@@ -267,6 +276,41 @@ export default function Hero() {
                     className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400"
                   />
                 </div>
+
+                {/* Optional appointment scheduling */}
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div className="relative">
+                    <input
+                      name="preferredDate"
+                      type="date"
+                      min={new Date().toISOString().split("T")[0]}
+                      className="w-full rounded-lg bg-gray-50/80 border border-gray-200 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-brand-navy focus:bg-white"
+                    />
+                  </div>
+                  <div className="relative">
+                    <select
+                      name="preferredTime"
+                      defaultValue=""
+                      className="w-full appearance-none rounded-lg bg-gray-50/80 border border-gray-200 px-3 py-2.5 text-xs text-gray-900 outline-none transition focus:border-brand-navy focus:bg-white"
+                    >
+                      <option value="" className="text-gray-400">
+                        Any time
+                      </option>
+                      {TIME_SLOTS.map((slot) => (
+                        <option key={slot} value={slot}>
+                          {slot}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown
+                      size={13}
+                      className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400"
+                    />
+                  </div>
+                </div>
+                <p className="-mt-1.5 flex items-center gap-1 text-[10px] text-gray-400">
+                  <Calendar size={11} /> Optional — pick a preferred date/time for your appointment
+                </p>
 
                 <button
                   type="submit"

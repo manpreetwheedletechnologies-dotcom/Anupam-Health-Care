@@ -137,11 +137,6 @@ export default function WhyChooseUs() {
               ))}
             </div>
 
-            {/* CTA Button */}
-            <button className="mt-8 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-brand-navy to-brand-navy/90 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-navy/20 transition-all duration-500 hover:shadow-xl hover:shadow-brand-navy/30 hover:-translate-y-0.5 hover:scale-[1.02] group">
-              Learn More About Our Services
-              <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
-            </button>
           </div>
 
           {/* Right: Enhanced 2x2 grid with cards */}

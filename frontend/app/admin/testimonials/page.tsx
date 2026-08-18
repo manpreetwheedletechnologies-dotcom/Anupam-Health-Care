@@ -11,9 +11,9 @@ const fields: FieldConfig[] = [
   { name: "service", label: "Service used", type: "text", placeholder: "Nursing Care" },
   {
     name: "image",
-    label: "Avatar URL",
-    type: "text",
-    helperText: "Leave blank to auto-generate an avatar from the name",
+    label: "Avatar",
+    type: "image",
+    helperText: "Upload a photo, or leave blank to auto-generate an avatar from the name",
   },
   { name: "order", label: "Display order", type: "number" },
   { name: "published", label: "Published (visible on the site)", type: "checkbox" },

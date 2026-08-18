@@ -6,7 +6,7 @@ const fields: FieldConfig[] = [
   { name: "name", label: "Name", type: "text", required: true },
   { name: "role", label: "Role", type: "text", required: true, placeholder: "Registered Nurse" },
   { name: "desc", label: "Short bio", type: "textarea", required: true },
-  { name: "image", label: "Photo URL", type: "text" },
+  { name: "image", label: "Photo", type: "image", helperText: "Upload a photo, or leave blank for an auto-generated avatar" },
   { name: "order", label: "Display order", type: "number" },
   { name: "published", label: "Published (visible on the site)", type: "checkbox" },
 ];

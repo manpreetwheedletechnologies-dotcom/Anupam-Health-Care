@@ -4,7 +4,12 @@ import { CreateServiceDto, UpdateServiceDto } from "./dto/service.dto";
 import { fromJsonArray, slugify, toJsonArray } from "../common/json.util";
 
 function present(row: any) {
-  return { ...row, features: toJsonArray(row.features) };
+  return {
+    ...row,
+    features: toJsonArray(row.features),
+    benefits: toJsonArray(row.benefits),
+    process: toJsonArray(row.process),
+  };
 }
 
 @Injectable()
@@ -37,11 +42,14 @@ export class ServicesService {
         title: dto.title,
         slug,
         desc: dto.desc,
+        longDesc: dto.longDesc ?? "",
         icon: dto.icon,
         color: dto.color ?? "navy",
         bg: dto.bg ?? "sky",
         image: dto.image ?? "/images/services/default.jpg",
         features: fromJsonArray(dto.features),
+        benefits: fromJsonArray(dto.benefits),
+        process: fromJsonArray(dto.process),
         order: dto.order ?? 0,
         published: dto.published ?? true,
       },
@@ -57,11 +65,14 @@ export class ServicesService {
         ...(dto.title !== undefined ? { title: dto.title } : {}),
         ...(dto.slug !== undefined ? { slug: slugify(dto.slug) } : {}),
         ...(dto.desc !== undefined ? { desc: dto.desc } : {}),
+        ...(dto.longDesc !== undefined ? { longDesc: dto.longDesc } : {}),
         ...(dto.icon !== undefined ? { icon: dto.icon } : {}),
         ...(dto.color !== undefined ? { color: dto.color } : {}),
         ...(dto.bg !== undefined ? { bg: dto.bg } : {}),
         ...(dto.image !== undefined ? { image: dto.image } : {}),
         ...(dto.features !== undefined ? { features: fromJsonArray(dto.features) } : {}),
+        ...(dto.benefits !== undefined ? { benefits: fromJsonArray(dto.benefits) } : {}),
+        ...(dto.process !== undefined ? { process: fromJsonArray(dto.process) } : {}),
         ...(dto.order !== undefined ? { order: dto.order } : {}),
         ...(dto.published !== undefined ? { published: dto.published } : {}),
       },

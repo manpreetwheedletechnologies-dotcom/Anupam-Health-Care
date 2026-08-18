@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { ChevronRight } from "lucide-react";
 import { getIcon } from "@/lib/icons";
+import { resolveImageUrl } from "@/lib/api";
 
 export default function ServiceCard({ title, desc, icon, color, bg, slug, features, image }) {
   // `icon` comes from the database as a plain string name (e.g. "UserRound")
@@ -16,9 +17,10 @@ export default function ServiceCard({ title, desc, icon, color, bg, slug, featur
       {/* Card image */}
       <div className="relative h-48 w-full overflow-hidden bg-gray-100">
         <Image
-          src={image}
+          src={resolveImageUrl(image)}
           alt={title}
           fill
+          unoptimized
           className="object-cover transition-transform duration-700 group-hover:scale-110"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/0 to-transparent" />

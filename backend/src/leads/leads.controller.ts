@@ -29,8 +29,8 @@ export class LeadsController {
 
   @UseGuards(JwtAuthGuard)
   @Patch(":id")
-  updateStatus(@Param("id") id: string, @Body() dto: UpdateLeadDto) {
-    return this.leadsService.updateStatus(id, dto);
+  update(@Param("id") id: string, @Body() dto: UpdateLeadDto) {
+    return this.leadsService.update(id, dto);
   }
 
   @UseGuards(JwtAuthGuard)

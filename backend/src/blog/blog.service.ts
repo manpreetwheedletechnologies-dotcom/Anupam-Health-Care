@@ -3,6 +3,10 @@ import { PrismaService } from "../prisma.service";
 import { CreateBlogPostDto, UpdateBlogPostDto } from "./dto/blog.dto";
 import { slugify } from "../common/json.util";
 
+// Fallback banner shown when a post has no image set — keeps blog cards
+// and the post page from ever showing a broken image.
+const DEFAULT_BLOG_IMAGE = "/images/nurse-patient-care.png";
+
 @Injectable()
 export class BlogService {
   constructor(private readonly prisma: PrismaService) {}
@@ -32,6 +36,7 @@ export class BlogService {
         slug,
         excerpt: dto.excerpt,
         content: dto.content ?? "",
+        image: dto.image || DEFAULT_BLOG_IMAGE,
         date: dto.date ?? new Date().toLocaleString("en-IN", { month: "long", year: "numeric" }),
         published: dto.published ?? true,
       },
@@ -47,6 +52,7 @@ export class BlogService {
         ...(dto.slug !== undefined ? { slug: slugify(dto.slug) } : {}),
         ...(dto.excerpt !== undefined ? { excerpt: dto.excerpt } : {}),
         ...(dto.content !== undefined ? { content: dto.content } : {}),
+        ...(dto.image !== undefined ? { image: dto.image || DEFAULT_BLOG_IMAGE } : {}),
         ...(dto.date !== undefined ? { date: dto.date } : {}),
         ...(dto.published !== undefined ? { published: dto.published } : {}),
       },

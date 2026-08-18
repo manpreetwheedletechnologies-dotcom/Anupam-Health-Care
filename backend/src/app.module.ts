@@ -6,6 +6,8 @@ import { PackagesModule } from "./packages/packages.module";
 import { TestimonialsModule } from "./testimonials/testimonials.module";
 import { TeamModule } from "./team/team.module";
 import { BlogModule } from "./blog/blog.module";
+import { UploadModule } from "./upload/upload.module";
+import { AboutModule } from "./about/about.module";
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { BlogModule } from "./blog/blog.module";
     TestimonialsModule,
     TeamModule,
     BlogModule,
+    UploadModule,
+    AboutModule,
   ],
   controllers: [],
   providers: [],

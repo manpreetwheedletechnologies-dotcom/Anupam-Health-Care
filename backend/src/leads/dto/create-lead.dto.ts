@@ -1,4 +1,4 @@
-import { IsIn, IsNotEmpty, Matches, MaxLength } from "class-validator";
+import { IsIn, IsNotEmpty, IsOptional, Matches, MaxLength } from "class-validator";
 
 // Areas served. This mirrors AREAS in frontend/context/SiteDataContext.tsx.
 // Update both if you expand service areas. Service *names* aren't
@@ -20,4 +20,14 @@ export class CreateLeadDto {
 
   @IsIn(AREAS)
   area!: string;
+
+  // Optional appointment request — a customer can ask for a service
+  // without picking a date/time, so neither is required.
+  @IsOptional()
+  @MaxLength(20)
+  preferredDate?: string;
+
+  @IsOptional()
+  @MaxLength(60)
+  preferredTime?: string;
 }

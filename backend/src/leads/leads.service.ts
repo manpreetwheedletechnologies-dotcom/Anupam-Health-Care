@@ -8,16 +8,35 @@ export class LeadsService {
   constructor(private readonly prisma: PrismaService) {}
 
   create(dto: CreateLeadDto) {
-    return this.prisma.lead.create({ data: { ...dto, status: "new" } });
+    return this.prisma.lead.create({
+      data: {
+        name: dto.name,
+        phone: dto.phone,
+        service: dto.service,
+        area: dto.area,
+        preferredDate: dto.preferredDate ?? "",
+        preferredTime: dto.preferredTime ?? "",
+        status: "new",
+      },
+    });
   }
 
   findAll() {
     return this.prisma.lead.findMany({ orderBy: { createdAt: "desc" } });
   }
 
-  async updateStatus(id: string, dto: UpdateLeadDto) {
+  // Handles status changes AND confirming an appointment date/time —
+  // whichever fields are present in the request get updated.
+  async update(id: string, dto: UpdateLeadDto) {
     await this.ensureExists(id);
-    return this.prisma.lead.update({ where: { id }, data: { status: dto.status } });
+    return this.prisma.lead.update({
+      where: { id },
+      data: {
+        ...(dto.status !== undefined ? { status: dto.status } : {}),
+        ...(dto.confirmedDate !== undefined ? { confirmedDate: dto.confirmedDate } : {}),
+        ...(dto.confirmedTime !== undefined ? { confirmedTime: dto.confirmedTime } : {}),
+      },
+    });
   }
 
   async remove(id: string) {
@@ -45,11 +64,18 @@ export class LeadsService {
       where: { createdAt: { gte: startOfToday } },
     });
 
+    // Appointments confirmed by admin (confirmedDate set) — useful for a
+    // dashboard "upcoming appointments" count.
+    const upcomingAppointments = await this.prisma.lead.count({
+      where: { confirmedDate: { not: "" } },
+    });
+
     return {
       totalLeads: total,
       newLeads,
       convertedLeads: converted,
       leadsToday,
+      upcomingAppointments,
       counts: { services, packages, testimonials, team, blog },
     };
   }

@@ -10,8 +10,20 @@ const fields: FieldConfig[] = [
     type: "text",
     helperText: "Leave blank to auto-generate from the title",
   },
+  {
+    name: "image",
+    label: "Banner image",
+    type: "image",
+    helperText: "Shown at the top of the blog card and the post page — like the service pages",
+  },
   { name: "excerpt", label: "Excerpt", type: "textarea", required: true },
-  { name: "content", label: "Full article content", type: "textarea" },
+  {
+    name: "content",
+    label: "Full article content",
+    type: "textarea",
+    helperText:
+      "Start a line with # for a heading, ## for a subheading, and - for a bullet point. Leave a blank line between paragraphs.",
+  },
   { name: "date", label: "Date label", type: "text", placeholder: "August 2026" },
   { name: "published", label: "Published (visible on the site)", type: "checkbox" },
 ];
