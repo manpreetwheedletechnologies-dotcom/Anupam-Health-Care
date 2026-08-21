@@ -99,11 +99,26 @@ model Lead {
   service       String
   area          String
   status        String   @default("new") // new | contacted | confirmed | converted | closed
+  source        String   @default("website") // "website" | "chatbot"
   preferredDate String   @default("") // what the customer asked for, e.g. "2026-08-20"
   preferredTime String   @default("") // customer's preferred slot, e.g. "Morning (9 AM - 12 PM)"
   confirmedDate String   @default("") // set by admin once the appointment is scheduled
   confirmedTime String   @default("") // set by admin, e.g. "10:30"
   createdAt     DateTime @default(now())
+}
+
+// ---------- Chatbot sessions ----------
+// One document per website visitor's chat session (identified by a
+// client-generated sessionId stored in their browser's localStorage).
+// Holds conversation state (for the booking flow) and message history.
+
+model ChatSession {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionId String   @unique
+  state     String   @default("{}") // JSON: { step: "idle" | "collecting_name" | ..., data: {...} }
+  messages  String   @default("[]") // JSON array of { role: "user" | "bot", text: string, at: string }
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // ---------- Admin user (dashboard login) ----------

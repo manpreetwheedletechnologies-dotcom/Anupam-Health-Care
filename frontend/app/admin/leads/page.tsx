@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Phone, Trash2, CalendarCheck, CalendarClock, Pencil, X } from "lucide-react";
+import { Loader2, Phone, Trash2, CalendarCheck, CalendarClock, Pencil, X, Bot } from "lucide-react";
 import { useAdminAuth } from "@/context/AdminAuthContext";
 import {
   adminGetLeads,
@@ -55,7 +55,6 @@ export default function AdminLeadsPage() {
     setLoading(true);
     try {
       const rows = await adminGetLeads(token);
-      console.log("Loaded leads:", rows); // Debug log
       setLeads(rows);
     } catch (err: any) {
       setError(err.message || "Failed to load leads");
@@ -83,7 +82,7 @@ export default function AdminLeadsPage() {
     setEditingId(lead.id);
     // Pre-fill with existing confirmed values, or fall back to what the customer requested.
     setConfirmDate(lead.confirmedDate || lead.preferredDate || "");
-    setConfirmTime(lead.confirmedTime || lead.preferredTime || "");
+    setConfirmTime(lead.confirmedTime || "");
   }
 
   async function saveAppointment(id: string) {
@@ -114,8 +113,8 @@ export default function AdminLeadsPage() {
   const visible = filter === "all" ? leads : leads.filter((l) => l.status === filter);
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+    <div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-lg font-bold text-brand-navy">Leads</h1>
           <p className="text-xs text-gray-400">
@@ -137,10 +136,10 @@ export default function AdminLeadsPage() {
       </div>
 
       {error && (
-        <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">{error}</div>
+        <div className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">{error}</div>
       )}
 
-      <div className="overflow-hidden rounded-xl border border-gray-100 bg-white">
+      <div className="mt-5 overflow-hidden rounded-xl border border-gray-100 bg-white">
         {loading ? (
           <div className="flex items-center justify-center gap-2 py-14 text-sm text-gray-400">
             <Loader2 size={16} className="animate-spin" /> Loading...
@@ -157,9 +156,17 @@ export default function AdminLeadsPage() {
               return (
                 <li key={lead.id} className="px-5 py-4">
                   <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 flex-wrap">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
                         <p className="font-medium text-gray-800">{lead.name}</p>
+                        {lead.source === "chatbot" && (
+                          <span
+                            title="Came from the website chatbot"
+                            className="flex items-center gap-1 rounded-full bg-brand-sky/40 px-2 py-0.5 text-[10px] font-semibold text-brand-navy"
+                          >
+                            <Bot size={10} /> Chatbot
+                          </span>
+                        )}
                         <select
                           value={lead.status}
                           onChange={(e) => updateStatus(lead.id, e.target.value)}
@@ -187,7 +194,7 @@ export default function AdminLeadsPage() {
                     </div>
                     <button
                       onClick={() => remove(lead.id)}
-                      className="rounded-md p-1.5 text-gray-300 hover:bg-red-50 hover:text-red-500 flex-shrink-0"
+                      className="rounded-md p-1.5 text-gray-300 hover:bg-red-50 hover:text-red-500"
                     >
                       <Trash2 size={14} />
                     </button>
@@ -196,7 +203,7 @@ export default function AdminLeadsPage() {
                   {/* Appointment info + confirm control */}
                   <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg bg-gray-50 px-3 py-2.5">
                     {hasConfirmed ? (
-                      <span className="flex items-center gap-1.5 text-xs font-medium text-green-600">
+                      <span className="flex items-center gap-1.5 text-xs font-medium text-brand-green">
                         <CalendarCheck size={13} />
                         Confirmed: {formatDate(lead.confirmedDate)}
                         {lead.confirmedTime && ` at ${formatTime(lead.confirmedTime)}`}
@@ -205,7 +212,7 @@ export default function AdminLeadsPage() {
                       <span className="flex items-center gap-1.5 text-xs text-gray-500">
                         <CalendarClock size={13} />
                         Requested: {formatDate(lead.preferredDate)}
-                        {lead.preferredTime && ` · ${formatTime(lead.preferredTime)}`}
+                        {lead.preferredTime && ` · ${lead.preferredTime}`}
                       </span>
                     ) : (
                       <span className="text-xs text-gray-400">No appointment requested</span>
@@ -223,7 +230,7 @@ export default function AdminLeadsPage() {
                   </div>
 
                   {isEditing && (
-                    <div className="mt-2 flex flex-wrap items-end gap-2 rounded-lg border border-brand-navy/10 bg-blue-50/30 p-3">
+                    <div className="mt-2 flex flex-wrap items-end gap-2 rounded-lg border border-brand-navy/10 bg-brand-sky/10 p-3">
                       <div>
                         <label className="text-[11px] font-medium text-gray-500">Date</label>
                         <input
@@ -245,14 +252,14 @@ export default function AdminLeadsPage() {
                       <button
                         onClick={() => saveAppointment(lead.id)}
                         disabled={saving || !confirmDate}
-                        className="flex items-center gap-1 rounded-lg bg-brand-navy px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60 hover:bg-brand-navy/90 transition-colors"
+                        className="flex items-center gap-1 rounded-lg bg-brand-navy px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
                       >
                         {saving ? <Loader2 size={12} className="animate-spin" /> : <CalendarCheck size={12} />}
                         Save
                       </button>
                       <button
                         onClick={() => setEditingId(null)}
-                        className="flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-500 hover:bg-gray-50 transition-colors"
+                        className="flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-500"
                       >
                         <X size={12} />
                         Cancel

@@ -87,7 +87,7 @@ export default function FloatingWhatsApp() {
           ${isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}
         `}
       >
-         Available 24/7
+        ⏰ Available 24/7
       </span>
     </div>
   );

@@ -8,6 +8,7 @@ import { TeamModule } from "./team/team.module";
 import { BlogModule } from "./blog/blog.module";
 import { UploadModule } from "./upload/upload.module";
 import { AboutModule } from "./about/about.module";
+import { ChatModule } from "./chat/chat.module";
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AboutModule } from "./about/about.module";
     BlogModule,
     UploadModule,
     AboutModule,
+    ChatModule,
   ],
   controllers: [],
   providers: [],

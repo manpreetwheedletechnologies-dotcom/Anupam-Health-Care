@@ -91,6 +91,7 @@ export type LeadItem = {
   service: string;
   area: string;
   status: string;
+  source: string;
   preferredDate: string;
   preferredTime: string;
   confirmedDate: string;
@@ -238,6 +239,36 @@ export type DashboardStats = {
 
 export const adminGetStats = (token: string) =>
   request<DashboardStats>("/leads/stats", { headers: authHeaders(token) });
+
+// ---------- Chatbot ----------
+
+export type ChatReply = {
+  reply: string;
+  quickReplies?: string[];
+  form?: "booking";
+  items?: { title: string; desc: string; price?: string; features?: string[] }[];
+  itemsType?: "services" | "packages";
+};
+
+export const sendChatMessage = (sessionId: string, message: string) =>
+  request<ChatReply>("/chat/message", {
+    method: "POST",
+    body: JSON.stringify({ sessionId, message }),
+  });
+
+export const sendChatBooking = (payload: {
+  sessionId: string;
+  name: string;
+  phone: string;
+  service: string;
+  area: string;
+  preferredDate?: string;
+  preferredTime?: string;
+}) =>
+  request<ChatReply>("/chat/book", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 
 // ---------- Admin: image upload ----------
 // Used by the "image" field type in ResourceManager (and the About page

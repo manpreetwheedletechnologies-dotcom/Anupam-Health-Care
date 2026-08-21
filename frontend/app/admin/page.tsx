@@ -17,21 +17,20 @@ import {
   Phone,
   TrendingUp,
   Clock,
-  ArrowUpRight,
-  Sparkles,
-  ChevronRight,
-  Circle,
-  AlertCircle,
+  ArrowRight,
+  Zap,
   Activity,
   BarChart3,
-  Zap,
+  PieChart,
+  LineChart,
+  Mail,
+  MapPin,
+  Calendar,
+  DollarSign,
+  Percent,
   Target,
-  Crown,
-  Gem,
-  Star,
   Award,
-  Bell,
-  MoreHorizontal,
+  Shield,
 } from "lucide-react";
 import { useAdminAuth } from "@/context/AdminAuthContext";
 import { adminGetStats, adminGetLeads, DashboardStats, LeadItem } from "@/lib/api";
@@ -43,28 +42,59 @@ function formatDate(dateStr: string) {
   return d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
 }
 
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
+// Simple chart components
+function MiniBarChart({ data, color = "brand-navy" }: { data: number[]; color?: string }) {
+  const max = Math.max(...data, 1);
+  return (
+    <div className="flex items-end gap-1 h-12">
+      {data.map((value, i) => (
+        <div
+          key={i}
+          className={`w-4 rounded-t bg-${color} transition-all duration-500`}
+          style={{ height: `${(value / max) * 100}%`, minHeight: "4px" }}
+        />
+      ))}
+    </div>
+  );
 }
 
-function getStatusColor(status: string) {
-  switch (status?.toLowerCase()) {
-    case "new":
-      return "bg-gradient-to-r from-blue-500/20 to-blue-600/20 text-blue-700 border-blue-200";
-    case "contacted":
-      return "bg-gradient-to-r from-amber-500/20 to-amber-600/20 text-amber-700 border-amber-200";
-    case "converted":
-      return "bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 text-emerald-700 border-emerald-200";
-    case "lost":
-      return "bg-gradient-to-r from-rose-500/20 to-rose-600/20 text-rose-700 border-rose-200";
-    default:
-      return "bg-gradient-to-r from-gray-500/20 to-gray-600/20 text-gray-700 border-gray-200";
-  }
+function DonutChart({ percentage, label }: { percentage: number; label: string }) {
+  const circumference = 2 * Math.PI * 24;
+  const offset = circumference - (percentage / 100) * circumference;
+  
+  return (
+    <div className="flex items-center gap-4">
+      <div className="relative">
+        <svg className="h-16 w-16 -rotate-90">
+          <circle
+            className="text-gray-100"
+            strokeWidth="6"
+            stroke="currentColor"
+            fill="transparent"
+            r="24"
+            cx="32"
+            cy="32"
+          />
+          <circle
+            className="text-brand-navy transition-all duration-1000"
+            strokeWidth="6"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+            stroke="currentColor"
+            fill="transparent"
+            r="24"
+            cx="32"
+            cy="32"
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-xs font-bold">{percentage}%</span>
+        </div>
+      </div>
+      <span className="text-xs text-gray-500">{label}</span>
+    </div>
+  );
 }
 
 export default function AdminDashboardHome() {
@@ -92,352 +122,333 @@ export default function AdminDashboardHome() {
 
   if (loading || !stats) {
     return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6">
-        <div className="relative">
-          <div className="absolute inset-0 animate-ping rounded-full bg-gradient-to-r from-brand-navy/20 to-blue-500/20" />
-          <div className="absolute inset-0 animate-pulse rounded-full bg-gradient-to-r from-brand-navy/10 to-blue-500/10 blur-xl" />
-          <Loader2 size={48} className="animate-spin text-brand-navy" />
-        </div>
-        <div className="space-y-2 text-center">
-          <p className="text-sm font-medium text-gray-600">Loading your dashboard</p>
-          <p className="text-xs text-gray-400">Preparing insights and analytics...</p>
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 size={32} className="animate-spin text-brand-navy" />
+          <p className="text-sm text-gray-400">Loading dashboard...</p>
         </div>
       </div>
     );
   }
 
+  // Calculate some metrics for charts
+  const conversionRate = stats.totalLeads > 0 
+    ? Math.round((stats.convertedLeads / stats.totalLeads) * 100) 
+    : 0;
+  
+  const appointmentRate = stats.upcomingAppointments > 0 
+    ? Math.round((stats.upcomingAppointments / stats.totalLeads) * 100) 
+    : 0;
+
+  const weeklyTrend = [12, 8, 15, 10, 18, 14, stats.leadsToday];
+  const monthlyLeads = [45, 52, 38, 60, 48, 55];
+
+  // Define all data arrays
   const cards = [
-    { 
-      label: "Total Leads", 
-      value: stats.totalLeads, 
-      icon: Users, 
-      gradient: "from-blue-500 to-blue-600",
-      bg: "bg-gradient-to-br from-blue-50 to-blue-100/50",
-      textColor: "text-blue-600",
-      trend: "+12.5%",
-      trendUp: true,
-      description: "All time leads",
-    },
-    { 
-      label: "New Leads", 
-      value: stats.newLeads, 
-      icon: UserPlus, 
-      gradient: "from-emerald-500 to-emerald-600",
-      bg: "bg-gradient-to-br from-emerald-50 to-emerald-100/50",
-      textColor: "text-emerald-600",
-      trend: "+8.2%",
-      trendUp: true,
-      description: "This month",
-    },
-    { 
-      label: "Appointments", 
-      value: stats.upcomingAppointments, 
-      icon: CalendarClock, 
-      gradient: "from-violet-500 to-violet-600",
-      bg: "bg-gradient-to-br from-violet-50 to-violet-100/50",
-      textColor: "text-violet-600",
-      trend: "+5.8%",
-      trendUp: true,
-      description: "Scheduled",
-    },
-    { 
-      label: "Conversion Rate", 
-      value: `${Math.round((stats.convertedLeads / stats.totalLeads) * 100)}%`, 
-      icon: Target, 
-      gradient: "from-amber-500 to-amber-600",
-      bg: "bg-gradient-to-br from-amber-50 to-amber-100/50",
-      textColor: "text-amber-600",
-      trend: "+3.2%",
-      trendUp: true,
-      description: "Conversion rate",
-    },
-    { 
-      label: "Today's Leads", 
-      value: stats.leadsToday, 
-      icon: CalendarCheck, 
-      gradient: "from-rose-500 to-rose-600",
-      bg: "bg-gradient-to-br from-rose-50 to-rose-100/50",
-      textColor: "text-rose-600",
-      trend: "+4",
-      trendUp: true,
-      description: "New today",
-    },
+    { label: "Total leads", value: stats.totalLeads, icon: Users, color: "from-blue-500 to-blue-600", bg: "bg-blue-50" },
+    { label: "New leads", value: stats.newLeads, icon: UserPlus, color: "from-emerald-500 to-emerald-600", bg: "bg-emerald-50" },
+    { label: "Appointments", value: stats.upcomingAppointments, icon: CalendarClock, color: "from-purple-500 to-purple-600", bg: "bg-purple-50" },
+    { label: "Converted", value: stats.convertedLeads, icon: CheckCircle2, color: "from-teal-500 to-teal-600", bg: "bg-teal-50" },
+    { label: "Leads today", value: stats.leadsToday, icon: CalendarCheck, color: "from-amber-500 to-amber-600", bg: "bg-amber-50" },
   ];
 
   const contentCards = [
-    { label: "Services", value: stats.counts.services, icon: Stethoscope, href: "/admin/services", color: "rose" },
-    { label: "Packages", value: stats.counts.packages, icon: Package, href: "/admin/packages", color: "indigo" },
-    { label: "Testimonials", value: stats.counts.testimonials, icon: MessageSquareQuote, href: "/admin/testimonials", color: "amber" },
-    { label: "Team", value: stats.counts.team, icon: UsersRound, href: "/admin/team", color: "emerald" },
-    { label: "Blog", value: stats.counts.blog, icon: Newspaper, href: "/admin/blog", color: "violet" },
+    { label: "Services", value: stats.counts.services, icon: Stethoscope, href: "/admin/services", desc: "Manage services" },
+    { label: "Packages", value: stats.counts.packages, icon: Package, href: "/admin/packages", desc: "Manage packages" },
+    { label: "Testimonials", value: stats.counts.testimonials, icon: MessageSquareQuote, href: "/admin/testimonials", desc: "Manage testimonials" },
+    { label: "Team members", value: stats.counts.team, icon: UsersRound, href: "/admin/team", desc: "Manage team" },
+    { label: "Blog posts", value: stats.counts.blog, icon: Newspaper, href: "/admin/blog", desc: "Manage blog" },
   ];
 
-  const colorMap = {
-    rose: "bg-rose-50 text-rose-600 hover:bg-rose-100 border-rose-200/50",
-    indigo: "bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border-indigo-200/50",
-    amber: "bg-amber-50 text-amber-600 hover:bg-amber-100 border-amber-200/50",
-    emerald: "bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border-emerald-200/50",
-    violet: "bg-violet-50 text-violet-600 hover:bg-violet-100 border-violet-200/50",
-  };
+  const quickActions = [
+    { label: "Add Lead", icon: UserPlus, href: "/admin/leads/add", color: "blue" },
+    { label: "New Service", icon: Stethoscope, href: "/admin/services/add", color: "emerald" },
+    { label: "Add Package", icon: Package, href: "/admin/packages/add", color: "purple" },
+    { label: "Write Blog", icon: Newspaper, href: "/admin/blog/add", color: "amber" },
+  ];
+
+  const insightCards = [
+    { 
+      label: "Conversion Rate", 
+      value: `${conversionRate}%`, 
+      icon: Target, 
+      color: "text-emerald-600",
+      bg: "bg-emerald-50",
+      change: "+12%"
+    },
+    { 
+      label: "Appointment Ratio", 
+      value: `${appointmentRate}%`, 
+      icon: Calendar, 
+      color: "text-purple-600",
+      bg: "bg-purple-50",
+      change: "+5%"
+    },
+    { 
+      label: "Avg. Response", 
+      value: "2.4h", 
+      icon: Clock, 
+      color: "text-blue-600",
+      bg: "bg-blue-50",
+      change: "-30%"
+    },
+    { 
+      label: "Lead Quality", 
+      value: "High", 
+      icon: Award, 
+      color: "text-amber-600",
+      bg: "bg-amber-50",
+      change: "+8%"
+    },
+  ];
+
 
   return (
-    <div className="space-y-8">
-      {/* Premium Header */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-navy via-brand-navy/95 to-blue-900 p-8 shadow-2xl">
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
-        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-blue-500/20 blur-3xl" />
-        <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-violet-500/20 blur-3xl" />
-        
-        <div className="relative flex items-start justify-between">
-          <div>
-            <div className="flex items-center gap-3">
-              <div className="rounded-2xl bg-white/10 p-2.5 backdrop-blur-sm">
-                <Sparkles size={24} className="text-white" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-white">Dashboard</h1>
-                <p className="mt-1 text-sm text-white/60">
-                  Welcome back! Here's your business performance overview.
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 backdrop-blur-sm">
-              <div className="h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-400 shadow-lg shadow-emerald-400/50" />
-              <span className="text-xs font-medium text-white/80">Live</span>
-            </div>
-            <button className="rounded-full bg-white/10 p-2.5 backdrop-blur-sm transition-all hover:bg-white/20">
-              <Bell size={18} className="text-white" />
-            </button>
-          </div>
+    <div className="space-y-6">
+      {/* Header with Time */}
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+          <p className="mt-1 text-sm text-gray-500">
+            Welcome back! Here's what's happening with your leads and content.
+          </p>
         </div>
-
-        {/* Mini stats */}
-        <div className="relative mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <div className="rounded-xl bg-white/5 p-3 backdrop-blur-sm">
-            <p className="text-xs text-white/50">Active Leads</p>
-            <p className="text-lg font-bold text-white">{stats.totalLeads - stats.convertedLeads}</p>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 rounded-full bg-green-50 px-3 py-1.5 text-xs font-medium text-green-700">
+            <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+            Live
           </div>
-          <div className="rounded-xl bg-white/5 p-3 backdrop-blur-sm">
-            <p className="text-xs text-white/50">Conversion Rate</p>
-            <p className="text-lg font-bold text-white">{Math.round((stats.convertedLeads / stats.totalLeads) * 100)}%</p>
-          </div>
-          <div className="rounded-xl bg-white/5 p-3 backdrop-blur-sm">
-            <p className="text-xs text-white/50">Avg Response</p>
-            <p className="text-lg font-bold text-white">2.4h</p>
+          <div className="text-xs text-gray-400">
+            <Clock size={12} className="inline mr-1" />
+            {new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
           </div>
         </div>
       </div>
 
-      {/* Enhanced Stats Grid */}
-      <div className="grid grid-cols-2 gap-5 lg:grid-cols-5">
-        {cards.map(({ label, value, icon: Icon, bg, textColor, trend, trendUp, description }, index) => (
+      {/* Quick Actions */}
+      {/* <div className="flex flex-wrap gap-2">
+        {quickActions.map(({ label, icon: Icon, href, color }) => (
+          <Link
+            key={label}
+            href={href}
+            className={`inline-flex items-center gap-2 rounded-full bg-${color}-50 px-4 py-2 text-xs font-medium text-${color}-600 transition-all hover:bg-${color}-100 hover:scale-105`}
+          >
+            <Icon size={14} /> {label}
+          </Link>
+        ))}
+      </div> */}
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
+        {cards.map(({ label, value, icon: Icon, color, bg }) => (
           <div
             key={label}
-            className="group relative overflow-hidden rounded-2xl border border-gray-100/80 bg-white p-6 transition-all duration-500 hover:shadow-xl hover:shadow-gray-100/50 hover:-translate-y-1 hover:border-gray-200"
-            style={{ animationDelay: `${index * 50}ms` }}
+            className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 transition-all duration-300 hover:shadow-lg hover:shadow-gray-100/50"
           >
-            {/* Animated gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-gray-50/0 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-            
-            <div className="relative">
-              <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${bg} transition-transform duration-300 group-hover:scale-110`}>
-                <Icon size={20} className={textColor} />
-              </div>
-              
-              <p className="mt-4 text-3xl font-bold tracking-tight text-gray-900">{value}</p>
-              
-              <div className="mt-1 flex items-center gap-2">
-                <p className="text-sm font-medium text-gray-600">{label}</p>
-                {trend && (
-                  <span className={`flex items-center gap-0.5 text-xs font-medium ${trendUp ? 'text-emerald-600' : 'text-rose-600'}`}>
-                    {trendUp ? <TrendingUp size={12} /> : <TrendingUp size={12} className="rotate-180" />}
-                    {trend}
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-gray-400">{description}</p>
+            <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-gradient-to-br opacity-5 group-hover:opacity-10 transition-opacity" />
+            <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${bg}`}>
+              <Icon size={18} className="text-gray-700" />
             </div>
-
-            {/* Decorative element */}
-            <div className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-gradient-to-br from-gray-50 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+            <p className="mt-3 text-2xl font-bold text-gray-900">{value}</p>
+            <p className="text-xs text-gray-500">{label}</p>
           </div>
         ))}
       </div>
 
-      {/* Quick Access with Premium Design */}
-      <div>
-        <div className="mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-6 w-1.5 rounded-full bg-gradient-to-b from-brand-navy to-blue-600" />
+      {/* Charts & Analytics Section */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        {/* Weekly Trend */}
+        <div className="rounded-2xl border border-gray-100 bg-white p-5">
+          <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-semibold text-gray-700">Quick Access</p>
-              <p className="text-xs text-gray-400">Manage your content in one click</p>
+              <p className="text-xs font-medium text-gray-500">Weekly Leads Trend</p>
+              <p className="text-xl font-bold text-gray-900">{stats.leadsToday} today</p>
             </div>
+            <TrendingUp size={18} className="text-emerald-500" />
           </div>
-          <button className="text-xs text-gray-400 hover:text-gray-600">View all →</button>
+          <MiniBarChart data={weeklyTrend} color="brand-navy" />
+          <div className="mt-2 flex justify-between text-[10px] text-gray-400">
+            <span>Mon</span>
+            <span>Tue</span>
+            <span>Wed</span>
+            <span>Thu</span>
+            <span>Fri</span>
+            <span>Sat</span>
+            <span>Sun</span>
+          </div>
         </div>
-        
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
-          {contentCards.map(({ label, value, icon: Icon, href, color }) => (
+
+        {/* Conversion Metrics */}
+        <div className="rounded-2xl border border-gray-100 bg-white p-5">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-medium text-gray-500">Conversion Metrics</p>
+            <PieChart size={18} className="text-brand-navy" />
+          </div>
+          <div className="mt-3 space-y-3">
+            <DonutChart percentage={conversionRate} label="Conversion Rate" />
+            <DonutChart percentage={appointmentRate} label="Appointment Rate" />
+          </div>
+        </div>
+      </div>
+
+      {/* Insight Cards */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {insightCards.map(({ label, value, icon: Icon, color, bg, change }) => (
+          <div key={label} className="rounded-2xl border border-gray-100 bg-white p-4">
+            <div className="flex items-center gap-3">
+              <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${bg}`}>
+                <Icon size={16} className={color} />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">{label}</p>
+                <p className="text-lg font-bold text-gray-900">{value}</p>
+              </div>
+            </div>
+            <p className={`mt-1 text-xs ${change.startsWith('+') ? 'text-emerald-600' : 'text-red-600'}`}>
+              {change} from last month
+            </p>
+          </div>
+        ))}
+      </div>
+
+      {/* Site Content */}
+      <div>
+        <div className="mb-4 flex items-center gap-2">
+          <div className="h-4 w-1 rounded-full bg-brand-navy" />
+          <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+            Site Content
+          </p>
+        </div>
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+          {contentCards.map(({ label, value, icon: Icon, href, desc }) => (
             <Link
               key={label}
               href={href}
-              className={`group relative overflow-hidden rounded-2xl border ${colorMap[color as keyof typeof colorMap]} bg-white p-5 transition-all duration-300 hover:shadow-lg hover:-translate-y-1`}
+              className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 transition-all duration-300 hover:border-brand-navy/20 hover:shadow-lg hover:shadow-brand-navy/5"
             >
-              <div className="relative flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className={`rounded-xl p-2.5 ${colorMap[color as keyof typeof colorMap].split(" ")[0]}`}>
-                    <Icon size={18} className={colorMap[color as keyof typeof colorMap].split(" ")[1]} />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-gray-900">{value}</p>
-                    <p className="text-xs font-medium text-gray-500">{label}</p>
-                  </div>
-                </div>
-                <ChevronRight size={16} className="text-gray-300 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5" />
-              </div>
-              
-              {/* Progress bar decoration */}
-              <div className="absolute bottom-0 left-0 h-0.5 w-0 bg-gradient-to-r from-current to-transparent transition-all duration-500 group-hover:w-full" />
+              <Icon size={18} className="text-brand-navy transition-transform group-hover:scale-110" />
+              <p className="mt-3 text-xl font-bold text-gray-900">{value}</p>
+              <p className="text-xs font-medium text-gray-900">{label}</p>
+              <p className="mt-0.5 text-xs text-gray-400">{desc}</p>
+              <ArrowRight size={12} className="absolute bottom-3 right-3 text-gray-300 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5" />
             </Link>
           ))}
         </div>
       </div>
 
-      {/* Appointments & Recent Leads with Premium Design */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Upcoming Appointments */}
-        <div className="rounded-2xl border border-gray-100/80 bg-white p-6 shadow-sm transition-all hover:shadow-lg">
-          <div className="mb-5 flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                <div className="h-5 w-1 rounded-full bg-gradient-to-b from-violet-500 to-violet-600" />
-                <p className="text-sm font-semibold text-gray-700">Upcoming Appointments</p>
-              </div>
-              <p className="text-xs text-gray-400">Scheduled client meetings</p>
-            </div>
-            <Link href="/admin/leads" className="group flex items-center gap-1 rounded-full bg-violet-50 px-3 py-1.5 text-xs font-medium text-violet-600 transition-all hover:bg-violet-100">
-              View all 
-              <ArrowUpRight size={12} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-            </Link>
+      {/* Upcoming Appointments */}
+      <div>
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="h-4 w-1 rounded-full bg-purple-500" />
+            <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+              Upcoming Appointments
+            </p>
+            <span className="rounded-full bg-purple-50 px-2 py-0.5 text-xs font-medium text-purple-600">
+              {upcomingAppointments.length}
+            </span>
           </div>
-
-          <div className="space-y-3">
-            {upcomingAppointments.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 py-12">
-                <div className="rounded-full bg-violet-50 p-4">
-                  <CalendarClock size={32} className="text-violet-400" />
-                </div>
-                <p className="mt-3 text-sm font-medium text-gray-600">No upcoming appointments</p>
-                <p className="text-xs text-gray-400">Confirm appointments from leads page</p>
-              </div>
-            ) : (
-              upcomingAppointments.map((lead, index) => (
-                <div
-                  key={lead.id}
-                  className="group relative overflow-hidden rounded-xl border border-gray-100 bg-gray-50/30 p-4 transition-all duration-300 hover:border-violet-200 hover:bg-white hover:shadow-md"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-violet-600 text-sm font-semibold text-white shadow-lg shadow-violet-500/20">
-                        {getInitials(lead.name)}
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-800">{lead.name}</p>
-                        <p className="text-xs text-gray-400">
-                          {lead.service} · {lead.area}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="flex items-center gap-1.5 rounded-full bg-violet-50 px-3 py-1.5 text-xs font-medium text-violet-700">
-                        <Clock size={12} />
-                        {formatDate(lead.confirmedDate)}
-                        {lead.confirmedTime && ` · ${lead.confirmedTime}`}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  {/* Status indicator */}
-                  <div className="absolute right-0 top-0 h-full w-1 bg-gradient-to-b from-violet-500 to-violet-600 opacity-0 transition-opacity group-hover:opacity-100" />
-                </div>
-              ))
-            )}
-          </div>
+          <Link
+            href="/admin/leads"
+            className="flex items-center gap-1 text-xs font-semibold text-brand-navy transition-colors hover:text-brand-navy/70"
+          >
+            View all <ArrowRight size={12} />
+          </Link>
         </div>
-
-        {/* Recent Leads */}
-        <div className="rounded-2xl border border-gray-100/80 bg-white p-6 shadow-sm transition-all hover:shadow-lg">
-          <div className="mb-5 flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                <div className="h-5 w-1 rounded-full bg-gradient-to-b from-blue-500 to-blue-600" />
-                <p className="text-sm font-semibold text-gray-700">Recent Leads</p>
-              </div>
-              <p className="text-xs text-gray-400">Latest client inquiries</p>
+        <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white">
+          {upcomingAppointments.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 py-12">
+              <CalendarClock size={32} className="text-gray-300" />
+              <p className="text-sm text-gray-400">No confirmed appointments yet</p>
+              <p className="text-xs text-gray-300">Confirm one from the Leads page</p>
             </div>
-            <Link href="/admin/leads" className="group flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-600 transition-all hover:bg-blue-100">
-              View all 
-              <ArrowUpRight size={12} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-            </Link>
-          </div>
-
-          <div className="space-y-3">
-            {recentLeads.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 py-12">
-                <div className="rounded-full bg-blue-50 p-4">
-                  <Users size={32} className="text-blue-400" />
-                </div>
-                <p className="mt-3 text-sm font-medium text-gray-600">No leads yet</p>
-                <p className="text-xs text-gray-400">Leads will appear here once received</p>
-              </div>
-            ) : (
-              recentLeads.map((lead) => (
-                <div
+          ) : (
+            <ul className="divide-y divide-gray-50">
+              {upcomingAppointments.map((lead) => (
+                <li
                   key={lead.id}
-                  className="group relative overflow-hidden rounded-xl border border-gray-100 bg-gray-50/30 p-4 transition-all duration-300 hover:border-blue-200 hover:bg-white hover:shadow-md"
+                  className="flex items-center justify-between px-6 py-4 transition-colors hover:bg-gray-50/50"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-sm font-semibold text-white shadow-lg shadow-blue-500/20">
-                        {getInitials(lead.name)}
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-800">{lead.name}</p>
-                        <p className="text-xs text-gray-400">
-                          {lead.service} · {lead.area}
-                        </p>
-                      </div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-50 text-xs font-semibold text-purple-600">
+                      {lead.name.charAt(0).toUpperCase()}
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className={`rounded-full border px-3 py-1.5 text-xs font-medium ${getStatusColor(lead.status)}`}>
-                        {lead.status || "New"}
-                      </span>
-                      <a
-                        href={`tel:${lead.phone}`}
-                        className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-600 transition-all hover:bg-blue-100"
-                      >
-                        <Phone size={12} /> {lead.phone}
-                      </a>
+                    <div>
+                      <p className="font-medium text-gray-900">{lead.name}</p>
+                      <p className="text-xs text-gray-500">
+                        {lead.service} · {lead.area}
+                      </p>
                     </div>
                   </div>
-                  
-                  {/* Status indicator */}
-                  <div className="absolute right-0 top-0 h-full w-1 bg-gradient-to-b from-blue-500 to-blue-600 opacity-0 transition-opacity group-hover:opacity-100" />
-                </div>
-              ))
-            )}
-          </div>
+                  <div className="flex items-center gap-2">
+                    <Clock size={12} className="text-gray-400" />
+                    <span className="text-xs font-semibold text-purple-600">
+                      {formatDate(lead.confirmedDate)}
+                      {lead.confirmedTime && ` · ${lead.confirmedTime}`}
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
 
-      {/* Premium Footer Note */}
-      <div className="rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100/50 p-4 text-center">
-        <p className="text-xs text-gray-400">
-          <span className="font-medium text-gray-500">✨ Premium Dashboard</span> · Last updated {new Date().toLocaleTimeString()}
-        </p>
+      {/* Recent Leads */}
+      <div>
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="h-4 w-1 rounded-full bg-blue-500" />
+            <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+              Recent Leads
+            </p>
+            <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-600">
+              {recentLeads.length}
+            </span>
+          </div>
+          <Link
+            href="/admin/leads"
+            className="flex items-center gap-1 text-xs font-semibold text-brand-navy transition-colors hover:text-brand-navy/70"
+          >
+            View all <ArrowRight size={12} />
+          </Link>
+        </div>
+        <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white">
+          {recentLeads.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 py-12">
+              <Users size={32} className="text-gray-300" />
+              <p className="text-sm text-gray-400">No leads yet</p>
+              <p className="text-xs text-gray-300">Leads will appear here once submitted</p>
+            </div>
+          ) : (
+            <ul className="divide-y divide-gray-50">
+              {recentLeads.map((lead) => (
+                <li
+                  key={lead.id}
+                  className="flex items-center justify-between px-6 py-4 transition-colors hover:bg-gray-50/50"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-xs font-semibold text-blue-600">
+                      {lead.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">{lead.name}</p>
+                      <p className="text-xs text-gray-500">
+                        {lead.service} · {lead.area}
+                      </p>
+                    </div>
+                  </div>
+                  <a
+                    href={`tel:${lead.phone}`}
+                    className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-600 transition-colors hover:bg-blue-100"
+                  >
+                    <Phone size={12} /> {lead.phone}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
     </div>
   );

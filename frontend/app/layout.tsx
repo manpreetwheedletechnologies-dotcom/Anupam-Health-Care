@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import BookServiceModal from "@/components/BookServiceModal";
+import ConditionalChatbot from "@/components/ConditionalChatbot";
 import { BookingModalProvider } from "@/context/BookingModalContext";
 import { SiteDataProvider } from "@/context/SiteDataContext";
 
@@ -22,7 +22,7 @@ export default function RootLayout({
         <SiteDataProvider>
           <BookingModalProvider>
             {children}
-            <FloatingWhatsApp />
+            <ConditionalChatbot />
             <BookServiceModal />
           </BookingModalProvider>
         </SiteDataProvider>
