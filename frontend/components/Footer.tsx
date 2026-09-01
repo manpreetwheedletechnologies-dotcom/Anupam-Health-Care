@@ -14,8 +14,9 @@ const QUICK_LINKS = [
 
 const CONTACT_INFO = [
   { icon: Phone, label: "7011598306", href: "tel:7011598306" },
+  { icon: Phone, label: "9818283386", href: "tel:9818283386" },
   { icon: Mail, label: "info@anupamhealthcare.com", href: "mailto:info@anupamhealthcare.com" },
-  { icon: MapPin, label: "123, Health Care Street, Ghaziabad, India-201001" },
+  { icon: MapPin, label: "GF 10, Ansal Satyam Building, RDC, Raj Nagar, Ghaziabad" },
   { icon: Clock, label: "Available 24/7 for Emergencies" },
 ];
 
@@ -135,11 +136,14 @@ export default function Footer() {
             </ul>
             {/* Emergency Badge */}
             <div className="mt-4 rounded-xl bg-brand-green/20 p-3 border border-brand-green/30">
-              <p className="flex items-center gap-2 text-xs font-semibold text-brand-green">
+              <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-semibold text-brand-green">
                 <Phone size={14} />
-                Emergency: 7011598306
+                <span>Emergency:</span>
+                <a href="tel:7011598306" className="hover:underline">7011598306</a>
+                <span>/</span>
+                <a href="tel:9818283386" className="hover:underline">9818283386</a>
               </p>
-              <p className="text-[10px] text-white/40">Available 24/7 for emergencies</p>
+              <p className="text-[10px] text-white/40 mt-1">Available 24/7 for emergencies</p>
             </div>
           </div>
         </div>

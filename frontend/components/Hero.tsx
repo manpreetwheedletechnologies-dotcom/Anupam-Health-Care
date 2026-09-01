@@ -347,7 +347,7 @@ export default function Hero() {
               {status === "error" && (
                 <div className="mt-3 animate-fade-up rounded-xl bg-red-50 p-3 text-center border border-red-200">
                   <p className="text-xs font-medium text-red-600">
-                    Something went wrong. Please call 7011598306 instead.
+                    Something went wrong. Please call 7011598306 or 9818283386 instead.
                   </p>
                 </div>
               )}

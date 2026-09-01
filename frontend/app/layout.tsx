@@ -8,7 +8,7 @@ import { SiteDataProvider } from "@/context/SiteDataContext";
 export const metadata: Metadata = {
   title: "Anupam Health Care Services | Care Beyond Compare",
   description:
-    "Home nursing, elder care, medical equipment on rent, blood sample collection and doctor consultation at home in Ghaziabad. Call 7011598306.",
+    "Home nursing, elder care, medical equipment on rent, blood sample collection and doctor consultation at home in Ghaziabad. Call 7011598306 / 9818283386.",
 };
 
 export default function RootLayout({

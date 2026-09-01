@@ -358,6 +358,12 @@ export default async function AboutPage() {
                 >
                   <Phone size={16} /> 7011598306
                 </a>
+                <a
+                  href="tel:9818283386"
+                  className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/20"
+                >
+                  <Phone size={16} /> 9818283386
+                </a>
               </div>
             </div>
           </div>

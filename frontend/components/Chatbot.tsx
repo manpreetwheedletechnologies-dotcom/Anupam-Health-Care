@@ -196,7 +196,7 @@ export default function Chatbot({
         ...prev,
         {
           role: "bot",
-          text: "Sorry, I'm having trouble connecting right now. Please call us at 7011598306.",
+          text: "Sorry, I'm having trouble connecting right now. Please call us at 7011598306 or 9818283386.",
         },
       ]);
     } finally {

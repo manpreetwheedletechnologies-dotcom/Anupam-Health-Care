@@ -193,7 +193,7 @@ export default function BookServiceModal() {
         {status === "error" && (
           <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3 text-center">
             <p className="text-xs font-medium text-red-600">
-              Something went wrong. Please call 7011598306 instead.
+              Something went wrong. Please call 7011598306 or 9818283386 instead.
             </p>
           </div>
         )}

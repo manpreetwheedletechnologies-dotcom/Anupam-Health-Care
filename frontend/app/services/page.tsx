@@ -166,6 +166,13 @@ export default async function ServicesPage() {
               >
                 7011598306
               </a>
+              {" / "}
+              <a
+                href="tel:9818283386"
+                className="font-semibold text-brand-navy hover:underline"
+              >
+                9818283386
+              </a>
             </p>
           </div>
         ) : (
@@ -263,10 +270,17 @@ export default async function ServicesPage() {
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <a
                 href="tel:7011598306"
-                className="inline-flex items-center gap-2 rounded-full bg-white px-8 py-3 text-sm font-semibold text-brand-navy transition-all hover:gap-3 hover:bg-gray-100"
+                className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-brand-navy transition-all hover:bg-gray-100"
               >
-                <Phone size={18} />
-                Call Now: 7011598306
+                <Phone size={16} />
+                Call: 7011598306
+              </a>
+              <a
+                href="tel:9818283386"
+                className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-brand-navy transition-all hover:bg-gray-100"
+              >
+                <Phone size={16} />
+                Call: 9818283386
               </a>
               <Link
                 href="/contact"

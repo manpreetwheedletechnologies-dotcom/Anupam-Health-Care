@@ -287,8 +287,12 @@ export default async function ServiceDetailPage({
           </p>
           <p className="mt-1 text-sm text-gray-500">
             Call us on{" "}
-            <a href="tel:7011598306" className="font-semibold text-brand-navy">
+            <a href="tel:7011598306" className="font-semibold text-brand-navy hover:underline">
               7011598306
+            </a>{" "}
+            or{" "}
+            <a href="tel:9818283386" className="font-semibold text-brand-navy hover:underline">
+              9818283386
             </a>{" "}
             and our team will help you choose the right service.
           </p>

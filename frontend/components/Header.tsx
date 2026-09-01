@@ -298,7 +298,13 @@ export default function Header() {
               href="tel:7011598306"
               className="mt-1 flex items-center justify-center gap-2 rounded-full border border-brand-navy/20 px-5 py-3 text-sm font-medium text-brand-navy"
             >
-              <Phone size={15} /> Call Now: 7011598306
+              <Phone size={15} /> Call: 7011598306
+            </a>
+            <a
+              href="tel:9818283386"
+              className="mt-1 flex items-center justify-center gap-2 rounded-full border border-brand-navy/20 px-5 py-3 text-sm font-medium text-brand-navy"
+            >
+              <Phone size={15} /> Call: 9818283386
             </a>
           </nav>
         </div>

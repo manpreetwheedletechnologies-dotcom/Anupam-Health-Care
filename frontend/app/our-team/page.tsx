@@ -277,9 +277,15 @@ export default async function OurTeamPage() {
               </BookServiceButton>
               <a
                 href="tel:7011598306"
-                className="inline-flex items-center gap-2 rounded-full border-2 border-white/30 px-8 py-3 text-sm font-semibold text-white transition-all hover:border-white hover:bg-white/10"
+                className="inline-flex items-center gap-2 rounded-full border-2 border-white/30 px-6 py-3 text-sm font-semibold text-white transition-all hover:border-white hover:bg-white/10"
               >
-                <Phone size={18} /> 7011598306
+                <Phone size={16} /> 7011598306
+              </a>
+              <a
+                href="tel:9818283386"
+                className="inline-flex items-center gap-2 rounded-full border-2 border-white/30 px-6 py-3 text-sm font-semibold text-white transition-all hover:border-white hover:bg-white/10"
+              >
+                <Phone size={16} /> 9818283386
               </a>
             </div>
             

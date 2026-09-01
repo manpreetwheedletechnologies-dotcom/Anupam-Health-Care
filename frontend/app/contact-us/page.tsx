@@ -36,7 +36,7 @@ type Status = "idle" | "submitting" | "success" | "error";
 // Replace the address text below with your real office address (URL-encoded
 // spaces become "+"), or swap in a full embed URL copied from Google Maps
 // (Share > Embed a map) if you want a pinned marker instead of a search.
-const OFFICE_ADDRESS = "123, Health Care Street, Ghaziabad, India - 201001";
+const OFFICE_ADDRESS = "GF 10, Ansal Satyam Building, RDC, Raj Nagar, Ghaziabad";
 const MAP_EMBED_SRC = `https://www.google.com/maps?q=${encodeURIComponent(
   OFFICE_ADDRESS
 )}&output=embed`;
@@ -80,9 +80,15 @@ export default function ContactUsPage() {
   const contactInfo = [
     {
       icon: Phone,
-      title: "Phone",
+      title: "Phone (Primary)",
       value: "7011598306",
       href: "tel:7011598306",
+    },
+    {
+      icon: Phone,
+      title: "Phone (Secondary)",
+      value: "9818283386",
+      href: "tel:9818283386",
     },
     {
       icon: Mail,
@@ -93,7 +99,7 @@ export default function ContactUsPage() {
     {
       icon: MapPin,
       title: "Address",
-      value: "123, Health Care Street, Ghaziabad, India - 201001",
+      value: "GF 10, Ansal Satyam Building, RDC, Raj Nagar, Ghaziabad",
       href: null,
     },
     {
@@ -170,6 +176,7 @@ export default function ContactUsPage() {
                 <div className="mt-10 hidden flex-col gap-4 md:flex">
                   {[
                     { icon: Phone, label: "7011598306", href: "tel:7011598306" },
+                    { icon: Phone, label: "9818283386", href: "tel:9818283386" },
                     { icon: Mail, label: "info@anupamhealthcare.com", href: "mailto:info@anupamhealthcare.com" },
                     { icon: Clock, label: "Available 24/7 for emergencies" },
                   ].map((item) => (
@@ -361,7 +368,7 @@ export default function ContactUsPage() {
                 {status === "error" && (
                   <div className="mt-4 flex items-center gap-2 rounded-xl bg-red-50 p-3 text-xs font-medium text-red-600">
                     <AlertCircle size={16} className="text-red-500" />
-                    Something went wrong. Please call 7011598306 instead.
+                    Something went wrong. Please call 7011598306 or 9818283386 instead.
                   </div>
                 )}
 
@@ -458,14 +465,21 @@ export default function ContactUsPage() {
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <a
                 href="tel:7011598306"
-                className="inline-flex items-center gap-2 rounded-full bg-brand-green px-8 py-3.5 text-sm font-semibold text-white shadow-lg transition-all hover:gap-3 hover:bg-brand-green/90 hover:shadow-xl"
+                className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3.5 text-sm font-semibold text-white shadow-lg transition-all hover:bg-brand-green/90 hover:shadow-xl"
               >
                 <Phone size={18} />
-                Call Emergency: 7011598306
+                Emergency: 7011598306
+              </a>
+              <a
+                href="tel:9818283386"
+                className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3.5 text-sm font-semibold text-white shadow-lg transition-all hover:bg-brand-green/90 hover:shadow-xl"
+              >
+                <Phone size={18} />
+                Emergency: 9818283386
               </a>
               <a
                 href="#"
-                className="inline-flex items-center gap-2 rounded-full border-2 border-white/30 px-8 py-3.5 text-sm font-semibold text-white transition-all hover:border-white hover:bg-white/10"
+                className="inline-flex items-center gap-2 rounded-full border-2 border-white/30 px-6 py-3.5 text-sm font-semibold text-white transition-all hover:border-white hover:bg-white/10"
               >
                 <Home size={18} />
                 Book Home Visit

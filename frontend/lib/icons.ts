@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   Baby,
   Bandage,
+  Heart,
   LucideIcon,
 } from "lucide-react";
 
@@ -38,6 +39,7 @@ export const ICON_MAP: Record<string, LucideIcon> = {
   ShieldCheck,
   Baby,
   Bandage,
+  Heart,
 };
 
 export const ICON_NAMES = Object.keys(ICON_MAP);
