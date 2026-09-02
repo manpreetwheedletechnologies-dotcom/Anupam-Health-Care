@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Plus, Pencil, Trash2, X, Loader2, Eye, EyeOff, Upload, ImageOff } from "lucide-react";
 import { useAdminAuth } from "@/context/AdminAuthContext";
+import { useAdminToast } from "@/context/AdminToastContext";
 import { adminListAll, adminCreate, adminUpdate, adminRemove, adminUploadImage, resolveImageUrl } from "@/lib/api";
 import { ICON_NAMES } from "@/lib/icons";
 
@@ -43,6 +44,7 @@ export default function ResourceManager({
   subtitleField,
 }: Props) {
   const { token } = useAdminAuth();
+  const { showSuccess, showError, showInfo } = useAdminToast();
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -116,13 +118,16 @@ export default function ResourceManager({
 
       if (editingId) {
         await adminUpdate(resource, editingId, token, payload);
+        showSuccess("Saved Successfully!", `${title} has been updated.`);
       } else {
         await adminCreate(resource, token, payload);
+        showSuccess("Created Successfully!", `New ${title} item has been added.`);
       }
       closeForm();
       await load();
     } catch (err: any) {
       setError(err.message || "Failed to save");
+      showError("Save Failed", err.message || "Please check your input.");
     } finally {
       setSaving(false);
     }
@@ -133,19 +138,27 @@ export default function ResourceManager({
     if (!confirm("Delete this item? This can't be undone.")) return;
     try {
       await adminRemove(resource, id, token);
+      showInfo("Deleted", `${title} item was deleted.`);
       await load();
     } catch (err: any) {
       setError(err.message || "Failed to delete");
+      showError("Delete Failed", err.message || "Could not delete item.");
     }
   }
 
   async function togglePublished(item: any) {
     if (!token) return;
     try {
-      await adminUpdate(resource, item.id, token, { published: !item.published });
+      const newStatus = !item.published;
+      await adminUpdate(resource, item.id, token, { published: newStatus });
+      showSuccess(
+        newStatus ? "Published!" : "Unpublished!",
+        `${item[titleField] || "Item"} is now ${newStatus ? "live" : "hidden"}.`
+      );
       await load();
     } catch (err: any) {
       setError(err.message || "Failed to update");
+      showError("Update Failed", "Could not change publish status.");
     }
   }
 

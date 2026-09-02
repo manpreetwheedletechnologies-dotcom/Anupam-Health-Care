@@ -6,6 +6,7 @@ import HowItWorks from "@/components/HowItWorks";
 import Services from "@/components/Services";
 import Packages from "@/components/Packages";
 import Testimonials from "@/components/Testimonials";
+import ReviewAndLocationQR from "@/components/ReviewAndLocationQR";
 import Footer from "@/components/Footer";
 
 export default function Home() {
@@ -19,6 +20,11 @@ export default function Home() {
       <Services />
       <Packages />
       <Testimonials />
+      <section className="bg-gradient-to-b from-white via-brand-sky/20 to-white px-5 py-12 md:px-8">
+        <div className="mx-auto max-w-5xl">
+          <ReviewAndLocationQR />
+        </div>
+      </section>
       <Footer />
     </main>
   );

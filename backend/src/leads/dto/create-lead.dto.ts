@@ -4,7 +4,15 @@ import { IsIn, IsNotEmpty, IsOptional, Matches, MaxLength } from "class-validato
 // Update both if you expand service areas. Service *names* aren't
 // validated here — they now come live from the Service table, so any
 // current service title from the dropdown is accepted.
-const AREAS = ["Raj Nagar", "Indirapuram", "Vaishali", "Other Ghaziabad"];
+const AREAS = [
+  "Raj Nagar",
+  "Raj Nagar (RDC)",
+  "Raj Nagar Extension",
+  "Govindpuram",
+  "Indirapuram",
+  "Vaishali",
+  "Other Ghaziabad",
+];
 
 export class CreateLeadDto {
   @IsNotEmpty()

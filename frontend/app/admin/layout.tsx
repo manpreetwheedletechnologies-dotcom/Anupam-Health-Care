@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { AdminAuthProvider, useAdminAuth } from "@/context/AdminAuthContext";
+import { AdminToastProvider } from "@/context/AdminToastContext";
 import AdminShell from "@/components/admin/AdminShell";
 import { ReactNode } from "react";
 
@@ -35,7 +36,9 @@ function Guard({ children }: { children: ReactNode }) {
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
     <AdminAuthProvider>
-      <Guard>{children}</Guard>
+      <AdminToastProvider>
+        <Guard>{children}</Guard>
+      </AdminToastProvider>
     </AdminAuthProvider>
   );
 }

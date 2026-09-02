@@ -24,30 +24,69 @@ import {
   Users,
   Heart,
   Home,
+  Building2,
+  ExternalLink,
 } from "lucide-react";
 import { useSiteData, AREAS } from "@/context/SiteDataContext";
 import { submitLead } from "@/lib/api";
 import Testimonials from "@/components/Testimonials";
+import ReviewAndLocationQR from "@/components/ReviewAndLocationQR";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
-// Simple Google Maps "embed" iframe — no API key, no extra package needed.
-// This matches the pattern used on the PGI Land Realtors contact page.
-// Replace the address text below with your real office address (URL-encoded
-// spaces become "+"), or swap in a full embed URL copied from Google Maps
-// (Share > Embed a map) if you want a pinned marker instead of a search.
-const OFFICE_ADDRESS = "GF 10, Ansal Satyam Building, RDC, Raj Nagar, Ghaziabad";
-const MAP_EMBED_SRC = `https://www.google.com/maps?q=${encodeURIComponent(
-  OFFICE_ADDRESS
-)}&output=embed`;
+const BRANCHES = [
+  {
+    id: "main",
+    type: "Head / Main Office",
+    name: "Head Office — RDC Raj Nagar",
+    shortName: "RDC Raj Nagar",
+    address: "GF 10, Ansal Satyam Building, RDC, Raj Nagar, Ghaziabad, Uttar Pradesh 201002",
+    phones: ["7011598306", "9818283386"],
+    mapSrc: `https://www.google.com/maps?q=${encodeURIComponent(
+      "GF 10, Ansal Satyam Building, RDC, Raj Nagar, Ghaziabad"
+    )}&output=embed`,
+    directionsUrl:
+      "https://maps.google.com/?q=Anupam+Health+Care+GF+10+Ansal+Satyam+Building+RDC+Raj+Nagar+Ghaziabad",
+  },
+  {
+    id: "rajnagar-ext",
+    type: "Branch Office",
+    name: "Branch Office — Raj Nagar Extension",
+    shortName: "Raj Nagar Extension",
+    address: "T1 MCC Signature Heights, Raj Nagar Extension, Ghaziabad, Uttar Pradesh 201003",
+    phones: ["7011598306", "9818283386"],
+    mapSrc: `https://www.google.com/maps?q=${encodeURIComponent(
+      "T1 MCC SIGNATURE HEIGHTS, Raj Nagar Extension, Ghaziabad, Uttar Pradesh 201003"
+    )}&output=embed`,
+    directionsUrl:
+      "https://maps.google.com/?q=T1+MCC+SIGNATURE+HEIGHTS+Raj+Nagar+Extension+Ghaziabad",
+  },
+  {
+    id: "govindpuram",
+    type: "Branch Office",
+    name: "Branch Office — Govindpuram",
+    shortName: "Govindpuram",
+    address: "D 564, Govindpuram, Ghaziabad, Uttar Pradesh 201013",
+    phones: ["7011598306", "9818283386"],
+    mapSrc: `https://www.google.com/maps?q=${encodeURIComponent(
+      "D 564, Govindpuram, Ghaziabad, Uttar Pradesh 201013"
+    )}&output=embed`,
+    directionsUrl:
+      "https://maps.google.com/?q=D+564+Govindpuram+Ghaziabad",
+  },
+];
 
-// Hero background image. Swap this for your own photo whenever you have one.
+// Hero background image.
 const HERO_IMAGE =
-  "/images/services/24x7-customer-support.png"; // Replace with your own hero image path
+  "/images/services/24x7-customer-support.png";
 
 export default function ContactUsPage() {
   const [status, setStatus] = useState<Status>("idle");
+  const [selectedBranchId, setSelectedBranchId] = useState<string>("main");
   const { services } = useSiteData();
+
+  const selectedBranch =
+    BRANCHES.find((b) => b.id === selectedBranchId) || BRANCHES[0];
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -393,55 +432,186 @@ export default function ContactUsPage() {
         </div>
       </section>
 
-      {/* Office Details Section — info cards (left) + map (right), below the hero */}
+      {/* Office Details Section — 3 office locations + dynamic map */}
       <section className="mx-auto max-w-6xl px-5 py-16 md:px-8">
-        <div className="mb-8 flex items-center gap-3">
-          <span className="h-8 w-1.5 rounded-full bg-gradient-to-b from-brand-green to-brand-sky" />
-          <h2 className="text-2xl font-bold text-brand-navy sm:text-3xl">Office Details</h2>
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Left: contact info cards, 2x2 grid */}
-          <div className="grid content-start gap-4 sm:grid-cols-2">
-            {contactInfo.map(({ icon: Icon, title, value, href }) => (
-              <div
-                key={title}
-                className="group rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-brand-sky/30 hover:shadow-lg"
-              >
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-brand-sky/10 transition-colors duration-300 group-hover:bg-brand-green group-hover:text-white">
-                  <Icon size={18} className="text-brand-navy transition-colors duration-300 group-hover:text-white" />
-                </div>
-                <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-gray-400">
-                  {title}
-                </p>
-                {href ? (
-                  <a
-                    href={href}
-                    className="text-sm font-medium text-brand-navy transition-colors hover:text-brand-green"
-                  >
-                    {value}
-                  </a>
-                ) : (
-                  <p className="text-sm leading-snug text-gray-800">{value}</p>
-                )}
-              </div>
-            ))}
+        <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+          <div className="flex items-center gap-3">
+            <span className="h-8 w-1.5 rounded-full bg-gradient-to-b from-brand-green to-brand-sky" />
+            <div>
+              <h2 className="text-2xl font-bold text-brand-navy sm:text-3xl">
+                Our Office Locations
+              </h2>
+              <p className="text-xs text-gray-500">
+                Main Head Office + 2 Branch Offices across Ghaziabad
+              </p>
+            </div>
           </div>
 
-          {/* Right: map */}
-          <div className="relative min-h-[320px] overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 shadow-sm md:min-h-full">
+          {/* Quick tab pills to toggle between 3 offices */}
+          <div className="flex flex-wrap gap-2">
+            {BRANCHES.map((b) => {
+              const isActive = selectedBranchId === b.id;
+              return (
+                <button
+                  key={b.id}
+                  onClick={() => setSelectedBranchId(b.id)}
+                  className={`rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${
+                    isActive
+                      ? "bg-brand-navy text-white shadow-md shadow-brand-navy/20"
+                      : "border border-gray-200 bg-white text-gray-600 hover:border-brand-navy/30 hover:bg-gray-50"
+                  }`}
+                >
+                  {b.shortName}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-12">
+          {/* Left: 3 Office location cards with distinct styling */}
+          <div className="space-y-4 md:col-span-6">
+            {BRANCHES.map((b) => {
+              const isSelected = selectedBranchId === b.id;
+              const isMain = b.id === "main";
+              const isBranch1 = b.id === "rajnagar-ext";
+
+              // Color classes based on office type
+              const badgeStyle = isMain
+                ? "bg-amber-100 text-amber-900 border-amber-300"
+                : isBranch1
+                ? "bg-emerald-100 text-emerald-900 border-emerald-300"
+                : "bg-sky-100 text-sky-900 border-sky-300";
+
+              const iconStyle = isMain
+                ? "bg-gradient-to-br from-amber-500 to-amber-600 text-white shadow-amber-200"
+                : isBranch1
+                ? "bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-emerald-200"
+                : "bg-gradient-to-br from-sky-500 to-brand-navy text-white shadow-sky-200";
+
+              const borderStyle = isSelected
+                ? isMain
+                  ? "border-amber-400 bg-gradient-to-r from-amber-50/60 via-white to-brand-sky/20 ring-2 ring-amber-400/40 shadow-lg"
+                  : isBranch1
+                  ? "border-emerald-400 bg-gradient-to-r from-emerald-50/60 via-white to-brand-sky/20 ring-2 ring-emerald-400/40 shadow-lg"
+                  : "border-sky-400 bg-gradient-to-r from-sky-50/60 via-white to-brand-sky/20 ring-2 ring-sky-400/40 shadow-lg"
+                : isMain
+                ? "border-amber-200 bg-amber-50/20 hover:border-amber-400 hover:shadow-md"
+                : "border-gray-200 bg-white hover:border-brand-sky/60 hover:shadow-md";
+
+              return (
+                <div
+                  key={b.id}
+                  onClick={() => setSelectedBranchId(b.id)}
+                  className={`cursor-pointer rounded-2xl border p-5 transition-all duration-300 ${borderStyle}`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl shadow-sm ${iconStyle}`}
+                      >
+                        {isMain ? <Star size={20} className="fill-white" /> : <Building2 size={20} />}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide ${badgeStyle}`}
+                          >
+                            {isMain ? "⭐ MAIN HEADQUARTERS" : b.type}
+                          </span>
+                          {isMain && (
+                            <span className="rounded bg-brand-navy px-1.5 py-0.5 text-[9px] font-bold text-white">
+                              PRIMARY
+                            </span>
+                          )}
+                        </div>
+                        <h4 className="mt-1 text-sm font-bold text-brand-navy sm:text-base">
+                          {b.name}
+                        </h4>
+                      </div>
+                    </div>
+
+                    <a
+                      href={b.directionsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-semibold transition ${
+                        isMain
+                          ? "border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-600 hover:text-white"
+                          : "border-gray-200 bg-white text-brand-navy hover:bg-brand-navy hover:text-white"
+                      }`}
+                    >
+                      <Navigation size={13} className={isMain ? "text-amber-600" : "text-brand-green"} />
+                      Directions
+                    </a>
+                  </div>
+
+                  <p className="mt-3.5 text-xs leading-relaxed text-gray-700 font-medium">
+                    <MapPin size={14} className="mr-1.5 inline text-brand-green" />
+                    {b.address}
+                  </p>
+
+                  <div className="mt-3.5 flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 pt-3 text-xs text-gray-500">
+                    <div className="flex items-center gap-2">
+                      <Phone size={13} className="text-brand-green" />
+                      <a
+                        href={`tel:${b.phones[0]}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="font-bold text-brand-navy hover:underline"
+                      >
+                        {b.phones[0]}
+                      </a>
+                      <span className="text-gray-300">|</span>
+                      <a
+                        href={`tel:${b.phones[1]}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="font-bold text-brand-navy hover:underline"
+                      >
+                        {b.phones[1]}
+                      </a>
+                    </div>
+                    <div className="flex items-center gap-1 font-medium text-brand-green">
+                      <Clock size={12} />
+                      <span>24/7 Support</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Right: Selected office map embed (6 cols) */}
+          <div className="relative flex min-h-[380px] flex-col overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 shadow-sm md:col-span-6">
             <div className="absolute left-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-[#2c3e50]/90 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
               <MapPin size={12} className="text-brand-green" />
-              Our Location
+              {selectedBranch.name}
             </div>
+
+            <a
+              href={selectedBranch.directionsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="absolute right-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-brand-green px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-md transition hover:bg-brand-green/90"
+            >
+              <ExternalLink size={12} />
+              Open GPS
+            </a>
+
             <iframe
-              title="Anupam Healthcare office location"
-              src={MAP_EMBED_SRC}
-              className="h-full w-full min-h-[320px] border-0"
+              key={selectedBranch.id}
+              title={`${selectedBranch.name} location map`}
+              src={selectedBranch.mapSrc}
+              className="h-full w-full min-h-[380px] border-0"
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
             />
           </div>
+        </div>
+
+        {/* QR Scanner Section */}
+        <div className="mt-10">
+          <ReviewAndLocationQR />
         </div>
       </section>
 

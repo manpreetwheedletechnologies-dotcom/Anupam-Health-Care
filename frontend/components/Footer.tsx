@@ -1,6 +1,7 @@
 "use client";
 
-import { Heart, Phone, Mail, MapPin, Clock, Facebook, Instagram, Youtube, Twitter, Award, Shield } from "lucide-react";
+import Link from "next/link";
+import { Heart, Phone, Mail, MapPin, Clock, Facebook, Instagram, Youtube, Twitter, Award, Shield, Lock } from "lucide-react";
 import { useSiteData } from "@/context/SiteDataContext";
 
 const QUICK_LINKS = [
@@ -15,7 +16,9 @@ const CONTACT_INFO = [
   { icon: Phone, label: "7011598306", href: "tel:7011598306" },
   { icon: Phone, label: "9818283386", href: "tel:9818283386" },
   { icon: Mail, label: "info@anupamhealthcare.com", href: "mailto:info@anupamhealthcare.com" },
-  { icon: MapPin, label: "GF 10, Ansal Satyam Building, RDC, Raj Nagar, Ghaziabad" },
+  { icon: MapPin, label: "Main Office: GF 10, Ansal Satyam Building, RDC, Raj Nagar, Ghaziabad" },
+  { icon: MapPin, label: "Branch: T1 MCC Signature Heights, Raj Nagar Extn, Ghaziabad" },
+  { icon: MapPin, label: "Branch: D 564, Govindpuram, Ghaziabad" },
   { icon: Clock, label: "Available 24/7 for Emergencies" },
 ];
 
@@ -110,54 +113,90 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Contact */}
-          <div>
-            <h4 className="text-sm font-semibold tracking-wider text-white/90">Contact Us</h4>
-            <ul className="mt-4 space-y-3">
-              {CONTACT_INFO.map(({ icon: Icon, label, href }) => (
-                <li key={label}>
-                  {href ? (
-                    <a
-                      href={href}
-                      className="flex items-start gap-3 text-sm text-white/60 transition hover:text-white"
-                    >
-                      <Icon size={16} className="shrink-0 mt-0.5 text-brand-green" />
-                      <span>{label}</span>
-                    </a>
-                  ) : (
-                    <div className="flex items-start gap-3 text-sm text-white/60">
-                      <Icon size={16} className="shrink-0 mt-0.5 text-brand-green" />
-                      <span>{label}</span>
-                    </div>
-                  )}
-                </li>
-              ))}
-            </ul>
-            {/* Emergency Badge */}
-            <div className="mt-4 rounded-xl bg-brand-green/20 p-3 border border-brand-green/30">
-              <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-semibold text-brand-green">
-                <Phone size={14} />
-                <span>Emergency:</span>
-                <a href="tel:7011598306" className="hover:underline">7011598306</a>
+          {/* Contact & Office Locations */}
+          <div className="space-y-4">
+            <h4 className="text-sm font-semibold tracking-wider text-white/90">Contact & Locations</h4>
+            
+            {/* Direct Contact Numbers */}
+            <div className="space-y-2 text-xs">
+              <div className="flex items-center gap-2 text-white/80">
+                <Phone size={14} className="text-brand-green shrink-0" />
+                <a href="tel:7011598306" className="hover:text-white font-semibold">7011598306</a>
                 <span>/</span>
-                <a href="tel:9818283386" className="hover:underline">9818283386</a>
+                <a href="tel:9818283386" className="hover:text-white font-semibold">9818283386</a>
+              </div>
+              <div className="flex items-center gap-2 text-white/70">
+                <Mail size={14} className="text-brand-green shrink-0" />
+                <a href="mailto:info@anupamhealthcare.com" className="hover:text-white">info@anupamhealthcare.com</a>
+              </div>
+            </div>
+
+            {/* Office Locations with distinct colored badges */}
+            <div className="space-y-2.5 pt-1">
+              {/* Head Office */}
+              <div className="rounded-xl bg-white/5 p-2.5 border border-amber-400/30">
+                <div className="flex items-center gap-1.5">
+                  <span className="inline-flex items-center gap-1 rounded bg-amber-400/20 px-1.5 py-0.5 text-[9px] font-bold text-amber-300 border border-amber-400/40">
+                    ⭐ MAIN HEAD OFFICE
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-white/90 font-medium leading-tight">
+                  GF 10, Ansal Satyam Building, RDC, Raj Nagar, Ghaziabad
+                </p>
+              </div>
+
+              {/* Branch 1 */}
+              <div className="rounded-xl bg-white/5 p-2.5 border border-emerald-500/30">
+                <div className="flex items-center gap-1.5">
+                  <span className="inline-flex items-center gap-1 rounded bg-emerald-500/20 px-1.5 py-0.5 text-[9px] font-bold text-emerald-300 border border-emerald-500/40">
+                    🏢 BRANCH 1 (Raj Nagar Extn)
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-white/75 leading-tight">
+                  T1 MCC Signature Heights, Raj Nagar Extension
+                </p>
+              </div>
+
+              {/* Branch 2 */}
+              <div className="rounded-xl bg-white/5 p-2.5 border border-sky-500/30">
+                <div className="flex items-center gap-1.5">
+                  <span className="inline-flex items-center gap-1 rounded bg-sky-500/20 px-1.5 py-0.5 text-[9px] font-bold text-sky-300 border border-sky-500/40">
+                    🏢 BRANCH 2 (Govindpuram)
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-white/75 leading-tight">
+                  D 564, Govindpuram, Ghaziabad
+                </p>
+              </div>
+            </div>
+
+            {/* Emergency Badge */}
+            <div className="rounded-xl bg-brand-green/20 p-2.5 border border-brand-green/30">
+              <p className="flex items-center gap-1.5 text-xs font-semibold text-brand-green">
+                <Clock size={13} />
+                <span>24/7 Available for Emergencies</span>
               </p>
-              <p className="text-[10px] text-white/40 mt-1">Available 24/7 for emergencies</p>
             </div>
           </div>
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-12 border-t border-white/10 pt-6 text-center">
+        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 text-center sm:flex-row sm:text-left">
           <p className="text-xs text-white/40">
             © {new Date().getFullYear()} Anupam Health Care Services. All rights reserved.
-            <br className="sm:hidden" />
             <span className="hidden sm:inline"> — </span>
             Care Beyond Compare
           </p>
-          <p className="mt-1 text-[10px] text-white/20">
-            Made with ❤️ for better healthcare at home
-          </p>
+
+          <div className="flex items-center gap-4 text-xs">
+            <Link
+              href="/admin/login"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-white/40 transition hover:bg-white/10 hover:text-white"
+            >
+              <Lock size={12} className="text-brand-green" />
+              Admin Portal
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

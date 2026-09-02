@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Loader2, Save, Upload, ImageOff } from "lucide-react";
 import { useAdminAuth } from "@/context/AdminAuthContext";
+import { useAdminToast } from "@/context/AdminToastContext";
 import { adminGetAbout, adminUpdateAbout, adminUploadImage, resolveImageUrl, AboutContentItem } from "@/lib/api";
 
 const FIELDS: { name: keyof AboutContentItem; label: string; type: "text" | "textarea"; helperText?: string }[] = [
@@ -19,6 +20,7 @@ const FIELDS: { name: keyof AboutContentItem; label: string; type: "text" | "tex
 
 export default function AdminAboutPage() {
   const { token } = useAdminAuth();
+  const { showSuccess, showError } = useAdminToast();
   const [values, setValues] = useState<AboutContentItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -44,9 +46,11 @@ export default function AdminAboutPage() {
       const updated = await adminUpdateAbout(token, values);
       setValues(updated);
       setSaved(true);
+      showSuccess("About Page Saved!", "Changes to the About Us page are now live.");
       setTimeout(() => setSaved(false), 3000);
     } catch (err: any) {
       setError(err.message || "Failed to save");
+      showError("Save Failed", err.message || "Could not save about page content.");
     } finally {
       setSaving(false);
     }

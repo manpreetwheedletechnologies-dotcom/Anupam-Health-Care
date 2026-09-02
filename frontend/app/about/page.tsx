@@ -43,7 +43,14 @@ const VALUES = [
 ] as const;
 
 // Mirrors AREAS in context/SiteDataContext.tsx (used by the booking form).
-const AREAS_SERVED = ["Raj Nagar", "Indirapuram", "Vaishali", "Other Ghaziabad"];
+const AREAS_SERVED = [
+  "Raj Nagar (RDC)",
+  "Raj Nagar Extension",
+  "Govindpuram",
+  "Indirapuram",
+  "Vaishali",
+  "Other Ghaziabad",
+];
 
 export default async function AboutPage() {
   const [services, team, about] = await Promise.all([

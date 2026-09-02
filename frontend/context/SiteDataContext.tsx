@@ -17,7 +17,14 @@ import {
 // Fallback area list. This is the one piece of "content" that isn't a
 // database table — it drives a form <select>, not a page — so it's kept
 // as a simple constant rather than another admin-managed resource.
-export const AREAS = ["Raj Nagar", "Indirapuram", "Vaishali", "Other Ghaziabad"];
+export const AREAS = [
+  "Raj Nagar (RDC)",
+  "Raj Nagar Extension",
+  "Govindpuram",
+  "Indirapuram",
+  "Vaishali",
+  "Other Ghaziabad",
+];
 
 type SiteData = {
   services: ServiceItem[];

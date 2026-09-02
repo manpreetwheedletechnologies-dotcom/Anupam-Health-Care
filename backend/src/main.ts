@@ -16,8 +16,26 @@ async function bootstrap() {
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
+  const envFrontend = process.env.FRONTEND_URL;
+  const configuredOrigins = envFrontend
+    ? envFrontend.split(",").map((s) => s.trim())
+    : ["http://localhost:3000", "http://localhost:3001"];
+
   app.enableCors({
-    origin: process.env.FRONTEND_URL ?? "http://localhost:3000",
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      if (
+        configuredOrigins.includes(origin) ||
+        /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
+      ) {
+        return callback(null, true);
+      }
+      return callback(null, true);
+    },
+    credentials: true,
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+    allowedHeaders: "Content-Type,Accept,Authorization",
   });
 
   app.useGlobalPipes(
