@@ -16,7 +16,7 @@ export default function AdminTeamPage() {
     <ResourceManager
       resource="team"
       title="Team"
-      description="Shown on the /our-team page."
+      description="Shown on the About page."
       fields={fields}
       titleField="name"
       subtitleField="role"

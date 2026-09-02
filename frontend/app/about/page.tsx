@@ -290,13 +290,6 @@ export default async function AboutPage() {
                   Meet our professionals
                 </h2>
               </div>
-              <Link
-                href="/our-team"
-                className="group hidden items-center gap-2 text-sm font-semibold text-brand-navy transition-all hover:gap-3 sm:flex"
-              >
-                View all
-                <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-              </Link>
             </div>
             <div className="mt-8 grid gap-6 sm:grid-cols-2 md:grid-cols-4">
               {team.slice(0, 4).map((member) => (
@@ -324,11 +317,6 @@ export default async function AboutPage() {
                   <p className="text-xs text-brand-green">{member.role}</p>
                 </div>
               ))}
-            </div>
-            <div className="mt-8 text-center sm:hidden">
-              <Link href="/our-team" className="inline-flex items-center gap-2 text-sm font-semibold text-brand-navy">
-                View all <ArrowRight size={14} />
-              </Link>
             </div>
           </div>
         </section>

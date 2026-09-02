@@ -18,7 +18,6 @@ import { getIcon } from "@/lib/icons";
 
 const NAV_LINKS = [
   { label: "About", href: "/about" },
-  { label: "Our Team", href: "/our-team" },
   { label: "Blogs & Resources", href: "/blog" },
   { label: "Contact Us", href: "/contact-us" },
 ];
